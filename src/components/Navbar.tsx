@@ -5,12 +5,11 @@ import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 const categories = [
-  { name: 'Todos', slug: 'todos' },
-  { name: 'Condimentos y Especies', slug: 'condimentos-y-especies' },
+  { name: 'Condimentos y Especies', slug: 'sazonadores' },
   { name: 'Bebidas', slug: 'bebidas' },
   { name: 'Granos', slug: 'granos' },
   { name: 'Snacks', slug: 'snacks' },
-  { name: 'Pastas y salsas', slug: 'pastas-y-salsas' },
+  { name: 'Pastas y salsas', slug: 'ajies' },
   { name: 'Marcas', slug: 'marcas' },
 ];
 
