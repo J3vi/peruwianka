@@ -21,3 +21,14 @@ Thumbs.db
 
 # vercel
 .vercel/
+
+# local
+.env.local
+.env
+
+# next
+.next/
+node_modules/
+
+# exports / archivos tuyos
+excel/
