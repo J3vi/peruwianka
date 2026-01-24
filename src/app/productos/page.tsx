@@ -15,10 +15,10 @@ const mockProducts = [
 
 const categories = [
   { name: "Condimentos y Especies", slug: "sazonadores" },
-  { name: "Pastas y salsas", slug: "ajies" },
   { name: "Granos", slug: "granos" },
   { name: "Bebidas", slug: "bebidas" },
   { name: "Snacks", slug: "snacks" },
+  { name: "Pastas y salsas", slug: "ajies" },
   { name: "Marcas", slug: "marcas" },
 ];
 

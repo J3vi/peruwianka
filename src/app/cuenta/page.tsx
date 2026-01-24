@@ -128,7 +128,7 @@ export default function CuentaPage() {
   }
 
   async function onLogout() {
-    await supabase.auth.signOut();
+    await await supabase.auth.signOut();
     setToast("Sesión cerrada.");
     setTimeout(() => setToast(null), 1500);
     router.push("/");

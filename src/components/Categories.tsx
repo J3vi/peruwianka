@@ -9,10 +9,10 @@ type Category = {
 
 const CATEGORIES: Category[] = [
   { slug: "sazonadores", name: "Condimentos y Especies", icon: "🍲" },
-  { slug: "ajies", name: "Pastas y salsas", icon: "🌶️" },
-  { slug: "granos", name: "Granos", icon: "🌽" },
   { slug: "bebidas", name: "Bebidas", icon: "🥤" },
+  { slug: "granos", name: "Granos", icon: "🌽" },
   { slug: "snacks", name: "Snacks", icon: "🍿" },
+  { slug: "ajies", name: "Pastas y Salsas", icon: "🌶️" },
   { slug: "marcas", name: "Marcas", icon: "🏷️" },
 ];
 

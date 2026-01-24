@@ -55,7 +55,7 @@ export default function AdminPage() {
           className="rounded-xl border p-5 hover:shadow-md transition"
         >
           <div className="text-2xl mb-2">📦</div>
-          <div className="font-semibold">Productos</div>
+          <div className="font-semibold">Configuracion</div>
           <div className="text-sm text-gray-600">Crear / editar / desactivar</div>
         </Link>
 

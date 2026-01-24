@@ -144,32 +144,46 @@ export default function Header() {
 
   useEffect(() => {
     let alive = true;
-
-    (async () => {
+  
+    const fetchMe = async () => {
       try {
         const res = await fetch("/api/me", { cache: "no-store" });
-        if (!res.ok) return;
-        const data = await res.json();
-        if (alive) setIsAdmin(!!data?.isAdmin);
+        if (!res.ok) {
+          if (alive) setIsAdmin(false);
+          return;
+        }
+        const json = await res.json();
+        if (alive) setIsAdmin(!!json.isAdmin);
       } catch {
-        // silencio: si falla, simplemente no mostramos Admin
+        if (alive) setIsAdmin(false);
       }
-    })();
-
+    };
+  
+    // 1) carga inicial
+    fetchMe();
+  
+    // 2) refresca cuando hay login/logout
+    const { data: sub } = supabase.auth.onAuthStateChange(() => {
+      fetchMe();
+    });
+  
     return () => {
       alive = false;
+      sub.subscription.unsubscribe();
     };
-  }, []);
+  }, [supabase]);
+  
 
   function onSubmitSearch(e: FormEvent) {
     e.preventDefault();
     const q = search.trim();
     if (!q) return;
     router.push(`/productos?query=${encodeURIComponent(q)}`);
+    setIsAdmin(false);
   }
 
   async function onLogout() {
-    await supabase.auth.signOut();
+    await await supabase.auth.signOut();
     // el listener arriba ya actualiza el UI y refresca
     router.push("/");
   }
@@ -240,6 +254,7 @@ export default function Header() {
                   <span className="text-lg">👤</span>
                   <span>Mi cuenta</span>
                 </Link>
+                
 
                 <button
                   type="button"
