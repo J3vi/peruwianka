@@ -30,6 +30,7 @@ CREATE TABLE products (
   category_id INTEGER REFERENCES categories(id),
   brand_id INTEGER REFERENCES brands(id),
   is_active BOOLEAN DEFAULT TRUE,
+  discount_percent NUMERIC(5,2) DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

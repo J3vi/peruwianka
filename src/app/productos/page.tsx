@@ -33,7 +33,11 @@ async function getProducts() {
     });
 
     if (!res.ok) throw new Error("Failed to fetch");
-    return await res.json();
+
+    const json = await res.json();
+
+    // ✅ tu API responde { products: [...] }
+    return Array.isArray(json) ? json : (json.products ?? []);
   } catch (error) {
     console.error("Error fetching products:", error);
     return mockProducts;

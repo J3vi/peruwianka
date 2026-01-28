@@ -1,153 +1,141 @@
-'use client';
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { createClient } from "../../../lib/supabase/server";
 
-type ProductRow = {
+type AdminProductRow = {
   id: number;
   name: string;
+  slug: string;
   price_estimated: number;
-  is_active: boolean;
-  category_id?: number | null;
-  category?: { name: string } | null; // <- si tu API ya hace join
+  weight: number;
+  is_active: boolean | null;
+  discount_percent: number;
+  category_name: string | null;
+  brand_name: string | null;
 };
 
-const formatPLN = (n: number) =>
-  new Intl.NumberFormat('pl-PL', { style: 'currency', currency: 'PLN' }).format(n);
+export default async function AdminProductosPage({
+  searchParams,
+}: {
+  searchParams?: { q?: string };
+}) {
+  const supabase = await createClient();
 
-export default function AdminProductosPage() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [products, setProducts] = useState<ProductRow[]>([]);
+  const q = typeof searchParams?.q === "string" ? searchParams.q.trim() : "";
 
-  useEffect(() => {
-    let alive = true;
+  let query = supabase
+    .from("v_admin_products")
+    .select("id,name,slug,price_estimated,weight,is_active,discount_percent,category_name,brand_name")
+    .order("id", { ascending: false });
 
-    (async () => {
-      try {
-        // 1) seguridad: solo admin
-        const me = await fetch("/api/me", { cache: "no-store" });
-        if (!me.ok) {
-          router.replace("/cuenta");
-          return;
-        }
-        const meJson = await me.json();
-        if (!meJson?.isAdmin) {
-          router.replace("/");
-          return;
-        }
-
-        // 2) datos
-        const res = await fetch("/api/admin/productos", { cache: "no-store" });
-        if (!res.ok) throw new Error("No se pudo cargar productos");
-        const json = await res.json();
-
-        const list: ProductRow[] = Array.isArray(json?.products) ? json.products : [];
-        if (alive) setProducts(list);
-      } catch (e: any) {
-        if (alive) setError(e?.message ?? "No se pudo cargar productos");
-      } finally {
-        if (alive) setLoading(false);
-      }
-    })();
-
-    return () => {
-      alive = false;
-    };
-  }, [router]);
-
-  if (loading) {
-    return (
-      <main className="mx-auto max-w-6xl px-4 py-10">
-        <h1 className="text-4xl font-bold">Admin · Productos</h1>
-        <p className="mt-2 text-gray-600">Cargando...</p>
-      </main>
-    );
+  // filtro por nombre o slug
+  if (q) {
+    query = query.or(`name.ilike.%${q}%,slug.ilike.%${q}%`);
   }
+
+  const { data, error } = await query;
 
   if (error) {
     return (
-      <main className="mx-auto max-w-6xl px-4 py-10">
-        <h1 className="text-4xl font-bold">Admin · Productos</h1>
-        <p className="mt-2 text-red-600">{error}</p>
-        <div className="mt-4 flex gap-4">
-          <Link className="underline" href="/admin">Volver al panel</Link>
-          <Link className="underline text-gray-600" href="/cuenta">Cerrar sesión</Link>
-        </div>
-      </main>
+      <div style={{ padding: 24 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 700 }}>Admin / Productos</h1>
+        <p style={{ marginTop: 12, color: "crimson" }}>
+          Error cargando productos: {error.message}
+        </p>
+      </div>
     );
   }
 
+  const rows = (data ?? []) as AdminProductRow[];
+
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-bold">Admin · Productos</h1>
-          <p className="mt-2 text-gray-600">
-            Lista de productos (edición viene en la siguiente micro-tarea).
-          </p>
+    <div style={{ padding: 24 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>Admin / Productos</h1>
+
+          {/* BUSCADOR */}
+          <form action="/admin/productos" method="get" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <input
+              name="q"
+              defaultValue={q}
+              placeholder="Buscar por nombre o slug…"
+              style={{
+                width: 280,
+                padding: "8px 10px",
+                border: "1px solid #ccc",
+                borderRadius: 10,
+              }}
+            />
+            <button
+              type="submit"
+              title="Buscar"
+              style={{
+                padding: "8px 10px",
+                borderRadius: 10,
+                border: "1px solid #ccc",
+                cursor: "pointer",
+              }}
+            >
+              🔍
+            </button>
+
+            {q && (
+              <Link href="/admin/productos" style={{ textDecoration: "underline", marginLeft: 6 }}>
+                limpiar
+              </Link>
+            )}
+          </form>
+
+          <Link
+            href="/admin/productos/nuevo"
+            className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2 text-white"
+          >
+            + Crear producto
+          </Link>
         </div>
 
-        <div className="flex gap-3">
-          <Link href="/admin" className="rounded-full border px-4 py-2 text-sm hover:bg-gray-50">
-            Panel
-          </Link>
-          <Link href="/cuenta" className="rounded-full border px-4 py-2 text-sm hover:bg-gray-50">
-            Cerrar sesión
-          </Link>
-        </div>
+        <Link href="/admin" style={{ textDecoration: "underline" }}>
+          ← Volver al panel
+        </Link>
       </div>
 
-      <div className="mt-8 overflow-hidden rounded-2xl border bg-white shadow-sm">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50">
-            <tr className="text-sm text-gray-700">
-              <th className="px-5 py-3 w-[90px]">ID</th>
-              <th className="px-5 py-3">Nombre</th>
-              <th className="px-5 py-3 w-[220px]">Categoría</th>
-              <th className="px-5 py-3 w-[160px]">Precio</th>
-              <th className="px-5 py-3 w-[120px]">Activo</th>
-              <th className="px-5 py-3 w-[140px]">Acciones</th>
+      {/* ...tu tabla igual (no la toco) */}
+      <div style={{ marginTop: 16, overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr>
+              {["ID","Producto","Categoría","Marca","Precio (PLN)","Peso","Activo","Desc.%","Acción"].map((h) => (
+                <th key={h} style={{ textAlign: "left", padding: "10px 12px", borderBottom: "1px solid #333", whiteSpace: "nowrap" }}>
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
-
-          <tbody className="divide-y">
-            {products.map((p) => (
-              <tr key={p.id} className="text-sm">
-                <td className="px-5 py-4">{p.id}</td>
-                <td className="px-5 py-4 font-medium">{p.name}</td>
-
-                <td className="px-5 py-4 text-gray-700">
-                  {/* Si tu API ya trae join -> p.category.name */}
-                  {p.category?.name ?? (p.category_id ? `#${p.category_id}` : "—")}
+          <tbody>
+            {rows.map((p) => (
+              <tr key={p.id}>
+                <td style={{ padding: "10px 12px", borderBottom: "1px solid #222" }}>{p.id}</td>
+                <td style={{ padding: "10px 12px", borderBottom: "1px solid #222" }}>
+                  <div style={{ fontWeight: 600 }}>{p.name}</div>
+                  <div style={{ opacity: 0.7, fontSize: 12 }}>{p.slug}</div>
                 </td>
-
-                <td className="px-5 py-4">{formatPLN(p.price_estimated)}</td>
-
-                <td className="px-5 py-4">
-                  {p.is_active ? (
-                    <span className="rounded-full bg-green-50 px-3 py-1 text-green-700">Sí</span>
-                  ) : (
-                    <span className="rounded-full bg-gray-100 px-3 py-1 text-gray-700">No</span>
-                  )}
-                </td>
-
-                <td className="px-5 py-4">
-                  <Link
-                    href={`/admin/productos/${p.id}`}
-                    className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
-                  >
-                    Editar
+                <td style={{ padding: "10px 12px", borderBottom: "1px solid #222" }}>{p.category_name ?? "-"}</td>
+                <td style={{ padding: "10px 12px", borderBottom: "1px solid #222" }}>{p.brand_name ?? "-"}</td>
+                <td style={{ padding: "10px 12px", borderBottom: "1px solid #222" }}>{Number(p.price_estimated ?? 0).toFixed(2)}</td>
+                <td style={{ padding: "10px 12px", borderBottom: "1px solid #222" }}>{p.weight ?? 0}</td>
+                <td style={{ padding: "10px 12px", borderBottom: "1px solid #222" }}>{p.is_active ? "Sí" : "No"}</td>
+                <td style={{ padding: "10px 12px", borderBottom: "1px solid #222" }}>{p.discount_percent}</td>
+                <td style={{ padding: "10px 12px", borderBottom: "1px solid #222", whiteSpace: "nowrap" }}>
+                  <Link href={`/admin/productos/${p.id}`} style={{ textDecoration: "underline" }}>
+                    Editar →
                   </Link>
                 </td>
               </tr>
             ))}
 
-            {products.length === 0 && (
+            {rows.length === 0 && (
               <tr>
-                <td className="px-5 py-10 text-gray-600" colSpan={6}>
+                <td colSpan={9} style={{ padding: "14px 12px", opacity: 0.7 }}>
                   No hay productos.
                 </td>
               </tr>
@@ -155,6 +143,6 @@ export default function AdminProductosPage() {
           </tbody>
         </table>
       </div>
-    </main>
+    </div>
   );
 }

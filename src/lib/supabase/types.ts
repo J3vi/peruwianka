@@ -25,6 +25,7 @@ export interface Product {
   brand_id: number
   is_active: boolean
   created_at: string
+  discount_percent: number | null
   category?: Category
   brand?: Brand
 }

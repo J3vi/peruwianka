@@ -2,7 +2,7 @@
 INSERT INTO public.categories (name, slug, icon)
 VALUES
   ('Sazonadores','sazonadores','🍲'),
-  ('pastas-y-salsas','ajies','🌶️'),
+  ('ajies','ajies','🌶️'),
   ('Granos','granos','🌽'),
   ('Bebidas','bebidas','🥤'),
   ('Snacks','snacks','🍿'),

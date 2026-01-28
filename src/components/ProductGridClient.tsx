@@ -77,7 +77,23 @@ export default function ProductGridClient({ products }: ProductGridClientProps) 
 
             <div className="p-4">
               <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
-              <p className="text-green-600 font-bold">{formatPLN(product.price_estimated)}</p>
+              {(() => {
+                const price = Number(product.price_estimated ?? 0);
+                const discount = Number(product.discount_percent ?? 0);
+                const finalPrice = discount > 0 ? +(price * (1 - discount / 100)).toFixed(2) : price;
+
+                return discount > 0 ? (
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-lg font-semibold text-green-600">{formatPLN(finalPrice)}</span>
+                    <span className="text-sm line-through opacity-60">{formatPLN(price)}</span>
+                    <span className="text-xs font-semibold px-2 py-1 rounded bg-red-600 text-white">
+                      -{discount}%
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-lg font-semibold text-green-600">{formatPLN(price)}</span>
+                );
+              })()}
 
               <button
                 type="button"

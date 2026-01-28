@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 
 function isAdminEmail(email: string | null | undefined) {
   const raw = process.env.ADMIN_EMAILS || "";
@@ -21,17 +22,18 @@ type PatchBody = Partial<{
   category_id: number;
   brand_id: number;
   is_active: boolean;
+  discount_percent: number;
 }>;
 
 export async function PATCH(req: Request, ctx: { params: { id: string } }) {
-  const supabase = await createClient();
+  const supabaseAuth = await createClient();
+  const supabaseAdmin = createServiceClient();
 
-  const { data: auth, error: authError } = await supabase.auth.getUser();
-  const user = auth?.user;
+  const { data: userData } = await supabaseAuth.auth.getUser();
+  const user = userData?.user;
 
-  if (authError || !user || !isAdminEmail(user.email)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!user) return NextResponse.json({ error: "No auth" }, { status: 401 });
+  if (!isAdminEmail(user.email)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const id = Number(ctx.params.id);
   if (!Number.isFinite(id)) {
@@ -56,16 +58,17 @@ export async function PATCH(req: Request, ctx: { params: { id: string } }) {
   if (typeof body.category_id === "number") update.category_id = body.category_id;
   if (typeof body.brand_id === "number") update.brand_id = body.brand_id;
   if (typeof body.is_active === "boolean") update.is_active = body.is_active;
+  if (typeof body.discount_percent === "number") update.discount_percent = body.discount_percent;
 
   if (Object.keys(update).length === 0) {
     return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("products")
     .update(update)
     .eq("id", id)
-    .select("id,name,slug,description,price_estimated,weight,image_url,category_id,brand_id,is_active,created_at")
+    .select("id,name,slug,description,price_estimated,weight,image_url,category_id,brand_id,is_active,discount_percent,created_at")
     .single();
 
   if (error) {
