@@ -25,7 +25,8 @@ export default function ProductGridClient({ products }: ProductGridClientProps) 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {products.map((product) => {
-        const fav = isFavorite(product.id);
+        const fav = isFavorite(String(product.id));
+
 
         return (
           <div
@@ -46,7 +47,7 @@ export default function ProductGridClient({ products }: ProductGridClientProps) 
                 type="button"
                 onClick={() => {
                   toggle({
-                    id: product.id,
+                    id: String(product.id),
                     name: product.name,
                     price_estimated: product.price_estimated,
                     image_url: product.image_url || '/placeholder.png',
