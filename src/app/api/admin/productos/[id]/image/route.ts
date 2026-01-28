@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+export const runtime = "nodejs";
+
+// OJO: NO exportes esta función
 function createServiceClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -16,7 +19,6 @@ function createServiceClient() {
   });
 }
 
-// POST /api/admin/productos/:id/image
 export async function POST(
   req: Request,
   { params }: { params: { id: string } }
@@ -76,6 +78,9 @@ export async function POST(
 
     return NextResponse.json({ publicUrl });
   } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? "Unknown error" }, { status: 500 });
+    return NextResponse.json(
+      { error: e?.message ?? "Unknown error" },
+      { status: 500 }
+    );
   }
 }
