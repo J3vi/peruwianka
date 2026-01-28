@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
 
+export const runtime = "nodejs";
+
 export async function POST(
   req: Request,
   { params }: { params: { id: string } }
@@ -20,23 +22,22 @@ export async function POST(
 
     const type = (file.type || "").toLowerCase();
     const ext =
-      type === "image/png"
-        ? "png"
-        : type === "image/jpeg" || type === "image/jpg"
+      type === "image/jpeg" || type === "image/jpg"
         ? "jpg"
+        : type === "image/png"
+        ? "png"
         : null;
 
     if (!ext) {
       return NextResponse.json({ error: "Only JPG/PNG allowed" }, { status: 400 });
     }
 
-    const supabase = createServiceClient();
-
     const bucket = "product-images";
     const path = `products/${id}.${ext}`;
 
-    const bytes = await file.arrayBuffer();
+    const supabase = createServiceClient();
 
+    const bytes = await file.arrayBuffer();
     const { error: upErr } = await supabase.storage.from(bucket).upload(path, bytes, {
       upsert: true,
       contentType: file.type,
@@ -47,8 +48,8 @@ export async function POST(
       return NextResponse.json({ error: upErr.message }, { status: 500 });
     }
 
-    const { data: pub } = supabase.storage.from(bucket).getPublicUrl(path);
-    const publicUrl = pub.publicUrl;
+    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+    const publicUrl = data.publicUrl;
 
     const { error: dbErr } = await supabase
       .from("products")
@@ -60,8 +61,10 @@ export async function POST(
     }
 
     return NextResponse.json({ publicUrl });
-  } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch (e: any) {
+    return NextResponse.json(
+      { error: e?.message ?? "Unknown error" },
+      { status: 500 }
+    );
   }
 }
