@@ -1,24 +1,7 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createServiceClient } from "@/lib/supabase/service";
 
-export const runtime = "nodejs";
-
-// OJO: NO exportes esta función
-function createServiceClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !serviceKey) {
-    throw new Error(
-      "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY"
-    );
-  }
-
-  return createClient(supabaseUrl, serviceKey, {
-    auth: { persistSession: false },
-  });
-}
-
+// POST /api/admin/productos/:id/image
 export async function POST(
   req: Request,
   { params }: { params: { id: string } }
@@ -54,11 +37,13 @@ export async function POST(
     const supabase = createServiceClient();
 
     const bytes = await file.arrayBuffer();
-    const { error: upErr } = await supabase.storage.from(bucket).upload(path, bytes, {
-      upsert: true,
-      contentType: file.type,
-      cacheControl: "3600",
-    });
+    const { error: upErr } = await supabase.storage
+      .from(bucket)
+      .upload(path, bytes, {
+        upsert: true,
+        contentType: file.type,
+        cacheControl: "3600",
+      });
 
     if (upErr) {
       return NextResponse.json({ error: upErr.message }, { status: 500 });
