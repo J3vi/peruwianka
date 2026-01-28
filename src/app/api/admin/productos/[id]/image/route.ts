@@ -1,23 +1,19 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-export const runtime = "nodejs";
-
 function createServiceClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceKey) {
-    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+    throw new Error(
+      "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY"
+    );
   }
 
   return createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false },
   });
-}
-
-export async function GET() {
-  return NextResponse.json({ ok: true });
 }
 
 // POST /api/admin/productos/:id/image
@@ -34,7 +30,7 @@ export async function POST(
     const form = await req.formData();
     const file = form.get("file");
 
-    if (!file || !(file instanceof Blob)) {
+    if (!file || !(file instanceof File)) {
       return NextResponse.json({ error: "Missing file" }, { status: 400 });
     }
 
