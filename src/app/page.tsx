@@ -2,6 +2,9 @@ import Categories from "@/components/Categories";
 import ProductGridClient from "@/components/ProductGridClient";
 import { createClient } from "@/lib/supabase/server";
 import type { Product } from "@/lib/supabase/types";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 
 export default async function Page() {
   const supabase = await createClient();
