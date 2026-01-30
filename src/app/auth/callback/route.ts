@@ -8,7 +8,7 @@ export async function GET(request: Request) {
 
   // Si no hay code, vuelve al inicio
   if (!code) {
-    return NextResponse.redirect(new URL("/", url.origin));
+    return NextResponse.redirect(new URL("/cuenta", url.origin));
   }
 
   const cookieStore = cookies();
