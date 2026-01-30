@@ -44,15 +44,31 @@ export async function POST(request: Request) {
     }
 
     // Fetch product prices
-    const productIds = items.map((item: any) => item.productId)
-    const { data: products, error: productsError } = await supabaseAdmin
-      .from('products')
-      .select('id, name, price_estimated')
-      .in('id', productIds)
+    const productIds = items.map((item: any) => item.productId).filter(Boolean);
 
-    if (productsError || !products) {
-      return NextResponse.json({ error: 'Failed to fetch product prices' }, { status: 500 })
+    const { data: products, error: productsError } = await supabaseAdmin
+      .from("products")
+      .select("id, name, price_estimated")
+      .in("id", productIds);
+    
+    if (productsError) {
+      console.error("🔥 products fetch error", {
+        message: productsError.message,
+        details: (productsError as any).details,
+        hint: (productsError as any).hint,
+        code: (productsError as any).code,
+        productIds,
+        url,
+      });
+    
+      return NextResponse.json({ error: "Failed to fetch product prices" }, { status: 500 });
     }
+    
+    if (!products) {
+      console.error("🔥 products fetch returned null", { productIds, url });
+      return NextResponse.json({ error: "Failed to fetch product prices" }, { status: 500 });
+    }
+    
 
     // Calculate totals
     let totalEstimated = 0
