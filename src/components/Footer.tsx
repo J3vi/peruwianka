@@ -6,8 +6,8 @@ export default function Footer() {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-lg font-semibold mb-4">peruwianka</h3>
-            <p>Productos peruanos de calidad</p>
+            <h3 className="text-lg font-semibold mb-4">PERUWIANKA</h3>
+            <p>El causa de un peruano es otro Kausa</p>
           </div>
           <div>
             <h4 className="text-md font-semibold mb-4">Enlaces</h4>

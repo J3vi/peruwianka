@@ -1,3 +1,4 @@
+import BannerCarousel from "@/components/BannerCarousel";
 import Categories from "@/components/Categories";
 import ProductGridClient from "@/components/ProductGridClient";
 import { createClient } from "@/lib/supabase/server";
@@ -20,35 +21,11 @@ export default async function Page() {
 
   return (
     <main>
-      {/* Hero (como antes, verde) */}
-      <section className="bg-green-600">
-  <div className="mx-auto max-w-6xl px-4 py-20 md:py-28">
-    <h1 className="text-5xl md:text-6xl font-extrabold text-center text-white tracking-tight">
-      Productos peruanos en Polonia
-    </h1>
+    
 
-    <p className="mt-5 text-center text-white/90 text-lg md:text-xl">
-      Condimentos, snacks y ajíes auténticos. Reserva hoy y recibe en casa.
-    </p>
-
-    <div className="mt-8 flex justify-center gap-3">
-      <a
-        href="ofertas"
-        className="inline-flex items-center justify-center rounded-full bg-white text-green-700 px-6 py-3 font-semibold hover:bg-white/90 transition"
-      >
-        Ver ofertas
-      </a>
-
-      <a
-        href="categorias"
-        className="inline-flex items-center justify-center rounded-full border border-white/60 text-white px-6 py-3 font-semibold hover:bg-white/10 transition"
-      >
-        Ver categorías
-      </a>
-    </div>
-  </div>
-</section>
-
+      <div className="px-4">
+        <BannerCarousel />
+      </div>
 
       {/* Categorías (usa tu componente real, NO hardcode) */}
       <section className="py-2">
