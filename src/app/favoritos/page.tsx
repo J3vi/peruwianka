@@ -128,7 +128,7 @@ export default function FavoritosPage() {
                       } as any);
                       showToast('Se ha agregado al carrito');
                     }}
-                    className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
+                    className="flex-1 bg-[#FF3131] text-[#FC145] py-2 rounded-lg hover:bg-[#e62b2b] hover:text-[#f5b800] focus:outline-none focus:ring-2 focus:ring-[#FF3131]/40"
                   >
                     Reserva
                   </button>

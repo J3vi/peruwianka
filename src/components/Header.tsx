@@ -13,6 +13,8 @@ import {
 } from "react";
 import CartDropdown from "@/components/CartDropdown";
 import { User as UserIcon } from "lucide-react";
+import Image from "next/image";
+
 
 // OJO: esta ruta la saco de tu estructura (src/lib/supabase/ts/client.ts)
 import { createClient as createSupabaseClient } from "@/lib/supabase/client";
@@ -216,9 +218,20 @@ export default function Header() {
       <div className="border-b">
         <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Logo */}
-          <Link href="/" className="text-3xl font-bold text-green-600">
-            Peruwianka
-          </Link>
+          <div className="shrink-0">
+  <Link href="/" className="flex items-center">
+    <Image
+      src="/logo.png"
+      alt="Peruwianka"
+      width={600}
+      height={180}
+      priority
+       className="block h-14 w-auto sm:h-13 md:h-17 scale-150 origin-left"
+
+    />
+  </Link>
+</div>
+
 
           {/* Search */}
           <div className="w-full sm:flex-1 sm:max-w-xl sm:mx-4 min-w-0">

@@ -23,7 +23,7 @@ export default async function Page() {
     <main>
     
 
-      <div className="px-4">
+      <div className="px-4 bg-[#FFF7E6]">
         <BannerCarousel />
       </div>
 

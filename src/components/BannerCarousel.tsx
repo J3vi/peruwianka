@@ -29,7 +29,7 @@ export default function BannerCarousel({ intervalMs = 4500 }: Props) {
 
   return (
     <div className="w-full">
-      <div className="relative w-full overflow-hidden rounded-2xl border bg-white">
+      <div className="relative w-full overflow-hidden rounded-2xl border bg-transparent">
         {/* Altura controlada (responsive) */}
 <div className="relative w-full h-[260px] sm:h-[360px] lg:h-[480px]">
   <Image
@@ -38,7 +38,7 @@ export default function BannerCarousel({ intervalMs = 4500 }: Props) {
     alt={`Banner ${index + 1}`}
     fill
     priority
-    className="object-cover object-center"
+    className="object-contain bg-white object-center bg-[#fff7e6]"
     sizes="100vw"
   />
 </div>

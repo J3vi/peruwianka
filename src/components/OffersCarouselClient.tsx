@@ -139,7 +139,7 @@ export default function OffersCarouselClient({ products }: { products: Product[]
                       addItem(p as any);
                       toast("Se ha agregado al carrito", "success");
                     }}
-                    className="flex-1 bg-green-600 text-white py-2 rounded-xl hover:bg-green-700 font-semibold"
+                    className="flex-1 bg-[#FF3131] text-[#FC145] py-2 rounded-xl hover:bg-[#e62b2b] hover:text-[#f5b800] focus:outline-none focus:ring-2 focus:ring-[#FF3131]/40 font-semibold"
                   >
                     Reserva
                   </button>

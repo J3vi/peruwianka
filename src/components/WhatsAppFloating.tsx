@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function WhatsAppFloating() {
   const phone = "48452907401";
-  const text = encodeURIComponent("Hola, quiero hacer una reserva en Peruwianka.");
+  const text = encodeURIComponent("Hola Kausa, quiero hacer una reserva en Peruwianka.");
   const href = `https://wa.me/${phone}?text=${text}`;
 
   return (

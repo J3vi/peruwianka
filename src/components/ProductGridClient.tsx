@@ -102,7 +102,7 @@ export default function ProductGridClient({ products }: ProductGridClientProps) 
                   addItem(product);
                   toast('Se ha agregado al carrito', 'success');
                 }}
-                className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 mt-2"
+                className="w-full bg-[#FF3131] text-[#FC145] py-2 rounded-lg hover:bg-[#e62b2b] hover:text-[#f5b800] focus:outline-none focus:ring-2 focus:ring-[#FF3131]/40 mt-2"
               >
                 Reserva
               </button>
