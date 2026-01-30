@@ -1,13 +1,14 @@
-import { NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-
-const supabaseAdmin = createSupabaseClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export async function GET(req: Request) {
   try {
+    const supabaseAdmin = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    );
     const auth = req.headers.get("authorization") || "";
     const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
 
@@ -15,7 +16,8 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "No auth" }, { status: 401 });
     }
 
-    const { data: userRes, error: userErr } = await supabaseAdmin.auth.getUser(token);
+    const { data: userRes, error: userErr } =
+      await supabaseAdmin.auth.getUser(token);
     if (userErr || !userRes?.user) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
@@ -24,13 +26,18 @@ export async function GET(req: Request) {
 
     const { data, error } = await supabaseAdmin
       .from("orders")
-      .select('id, created_at, status, total_estimated, shipping_cost, items, full_name, phone, city, address, comment')
+      .select(
+        "id, created_at, status, total_estimated, shipping_cost, items, full_name, phone, city, address, comment",
+      )
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
     if (error) {
       console.error(error);
-      return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to fetch orders" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({ orders: data ?? [] });
