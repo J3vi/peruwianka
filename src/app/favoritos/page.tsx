@@ -90,8 +90,7 @@ export default function FavoritosPage() {
 
       <div className="mt-3 mb-6 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-gray-800">
         <span className="font-semibold">Tip:</span> Tus favoritos se guardan por ahora en este dispositivo.
-        Si te registras, los sincronizamos en tu cuenta para que no se pierdan y puedas verlos desde cualquier lugar.
-      </div>
+            </div>
 
       {favorites.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-xl p-6 text-gray-700">
