@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 
 function isAdminEmail(email: string | null | undefined) {
   const raw = process.env.ADMIN_EMAILS || "";
