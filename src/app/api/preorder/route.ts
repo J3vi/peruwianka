@@ -96,8 +96,21 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ ok: true, orderId: order.id })
-  } catch (error) {
-    console.error('Unexpected error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  } catch (err: any) {
+    console.error("🔥 /api/preorder FAILED", {
+      message: err?.message,
+      stack: err?.stack,
+      name: err?.name,
+      cause: err?.cause,
+    });
+
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "preorder_failed",
+        detail: err?.message ?? String(err),
+      },
+      { status: 500 }
+    );
   }
 }
