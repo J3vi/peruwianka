@@ -2,9 +2,17 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react";
 import CartDropdown from "@/components/CartDropdown";
-import { useCart } from "@/hooks/useCart";
+import { User as UserIcon } from "lucide-react";
 
 // OJO: esta ruta la saco de tu estructura (src/lib/supabase/ts/client.ts)
 import { createClient as createSupabaseClient } from "@/lib/supabase/client";
@@ -22,7 +30,9 @@ export default function Header() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [products, setProducts] = useState<{id:number;name:string;price_estimated:number;image_url:string}[]>([]);
+  const [products, setProducts] = useState<
+    { id: number; name: string; price_estimated: number; image_url: string }[]
+  >([]);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -99,13 +109,13 @@ export default function Header() {
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (!open) return;
     const totalItems = suggestions.length + products.length;
-    if (e.key === 'ArrowDown') {
+    if (e.key === "ArrowDown") {
       e.preventDefault();
-      setHighlightedIndex(prev => (prev + 1) % totalItems);
-    } else if (e.key === 'ArrowUp') {
+      setHighlightedIndex((prev) => (prev + 1) % totalItems);
+    } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setHighlightedIndex(prev => prev <= 0 ? totalItems - 1 : prev - 1);
-    } else if (e.key === 'Enter') {
+      setHighlightedIndex((prev) => (prev <= 0 ? totalItems - 1 : prev - 1));
+    } else if (e.key === "Enter") {
       e.preventDefault();
       if (highlightedIndex >= 0) {
         if (highlightedIndex < suggestions.length) {
@@ -119,7 +129,7 @@ export default function Header() {
         setOpen(false);
         setHighlightedIndex(-1);
       }
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       setOpen(false);
       setHighlightedIndex(-1);
     }
@@ -127,14 +137,18 @@ export default function Header() {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) &&
-          inputRef.current && !inputRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node)
+      ) {
         setOpen(false);
         setHighlightedIndex(-1);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -144,7 +158,7 @@ export default function Header() {
 
   useEffect(() => {
     let alive = true;
-  
+
     const fetchMe = async () => {
       try {
         const res = await fetch("/api/me", { cache: "no-store" });
@@ -158,21 +172,20 @@ export default function Header() {
         if (alive) setIsAdmin(false);
       }
     };
-  
+
     // 1) carga inicial
     fetchMe();
-  
+
     // 2) refresca cuando hay login/logout
     const { data: sub } = supabase.auth.onAuthStateChange(() => {
       fetchMe();
     });
-  
+
     return () => {
       alive = false;
       sub.subscription.unsubscribe();
     };
   }, [supabase]);
-  
 
   function onSubmitSearch(e: FormEvent) {
     e.preventDefault();
@@ -183,8 +196,7 @@ export default function Header() {
   }
 
   async function onLogout() {
-    await await supabase.auth.signOut();
-    // el listener arriba ya actualiza el UI y refresca
+    await supabase.auth.signOut();
     router.push("/");
   }
 
@@ -194,12 +206,11 @@ export default function Header() {
     <div className="sticky top-0 z-50 bg-white">
       {/* Barra roja */}
       <div className="bg-red-600 text-white text-center text-sm py-2">
-       <div className="mx-auto flex items-center justify-center gap-2 px-4">
+        <div className="mx-auto flex items-center justify-center gap-2 px-4">
           <span aria-hidden className="text-base">🚚</span>
-           <span>Envío gratis desde 220 zł</span>
-          </div>
+          <span>Envío gratis desde 220 zł</span>
         </div>
-
+      </div>
 
       {/* Header */}
       <div className="border-b">
@@ -214,8 +225,14 @@ export default function Header() {
             <form onSubmit={onSubmitSearch} className="w-full max-w-xl">
               <div className="flex w-full">
                 <input
+                  ref={inputRef}
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setSearch(v);
+                    debouncedFetch(v);
+                  }}
+                  onKeyDown={handleKeyDown}
                   placeholder="Buscar productos..."
                   className="w-full rounded-l-lg border border-r-0 px-4 py-2 outline-none focus:ring-2 focus:ring-red-200"
                 />
@@ -226,7 +243,6 @@ export default function Header() {
                   aria-label="Buscar"
                   title="Buscar"
                 >
-                  {/* lupa */}
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                     <path
                       d="M21 21l-4.3-4.3m1.3-5.2a7 7 0 1 1-14 0a7 7 0 0 1 14 0Z"
@@ -238,23 +254,76 @@ export default function Header() {
                   <span className="hidden sm:inline">Buscar</span>
                 </button>
               </div>
+
+              {/* Dropdown búsqueda (si lo usas) */}
+              {open && (
+                <div
+                  ref={dropdownRef}
+                  className="mt-2 rounded-lg border bg-white shadow-sm overflow-hidden"
+                >
+                  {loading && <div className="p-3 text-sm text-gray-500">Buscando…</div>}
+
+                  {!loading && suggestions.length === 0 && products.length === 0 && (
+                    <div className="p-3 text-sm text-gray-500">Sin resultados</div>
+                  )}
+
+                  {!loading && suggestions.length > 0 && (
+                    <div className="border-b">
+                      {suggestions.map((s, idx) => (
+                        <button
+                          key={s}
+                          type="button"
+                          className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${
+                            highlightedIndex === idx ? "bg-gray-50" : ""
+                          }`}
+                          onClick={() => {
+                            router.push(`/productos?query=${encodeURIComponent(s)}`);
+                            setOpen(false);
+                            setHighlightedIndex(-1);
+                          }}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {!loading && products.length > 0 && (
+                    <div>
+                      {products.map((p, idx) => {
+                        const hi = suggestions.length + idx;
+                        return (
+                          <button
+                            key={p.id}
+                            type="button"
+                            className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${
+                              highlightedIndex === hi ? "bg-gray-50" : ""
+                            }`}
+                            onClick={() => {
+                              router.push(`/productos?query=${encodeURIComponent(p.name)}`);
+                              setOpen(false);
+                              setHighlightedIndex(-1);
+                            }}
+                          >
+                            {p.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
             </form>
           </div>
 
-          {/* Icons */}
-          <div className="w-full flex items-center justify-between gap-3 sm:w-auto sm:justify-end sm:gap-4">
-            {!user ? (
-              <Link href="/cuenta" className="flex items-center gap-2 hover:opacity-80">
-                <span className="text-lg">👤</span>
-                <span className="hidden sm:inline">Iniciar sesión</span>
-              </Link>
-            ) : (
+          {/* Right / Icons */}
+          <div className="w-full sm:w-auto flex items-center justify-between sm:justify-end gap-3">
+            {user ? (
               <div className="flex items-center gap-3">
                 <Link href="/cuenta" className="flex items-center gap-2 hover:opacity-80">
-                  <span className="text-lg">👤</span>
-                  <span>Mi cuenta</span>
+                  <UserIcon className="h-5 w-5" />
+                  <span className="inline text-xs sm:text-sm">Cuenta</span>
                 </Link>
-                
 
                 <button
                   type="button"
@@ -264,6 +333,11 @@ export default function Header() {
                   Cerrar sesión
                 </button>
               </div>
+            ) : (
+              <Link href="/login" className="flex items-center gap-2 hover:opacity-80">
+                <UserIcon className="h-5 w-5" />
+                <span className="inline text-xs sm:text-sm">Ingresar</span>
+              </Link>
             )}
 
             <Link href="/favoritos" className="flex items-center gap-2 text-gray-600 hover:text-green-600">
