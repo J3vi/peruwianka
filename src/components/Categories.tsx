@@ -12,7 +12,7 @@ const CATEGORIES: Category[] = [
   { slug: "bebidas", name: "Bebidas", icon: "🥤" },
   { slug: "granos", name: "Granos", icon: "🌽" },
   { slug: "snacks", name: "Snacks", icon: "🍿" },
-  { slug: "ajies", name: "Pastas y Salsas", icon: "🌶️" },
+  { slug: "pastas-y-salsas", name: "Pastas y Salsas", icon: "🌶️" },
   { slug: "marcas", name: "Marcas", icon: "🏷️" },
 ];
 

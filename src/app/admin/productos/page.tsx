@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "../../../lib/supabase/server";
+import DeleteButton from "./DeleteButton";
 
 type AdminProductRow = {
   id: number;
@@ -129,6 +130,7 @@ export default async function AdminProductosPage({
                   <Link href={`/admin/productos/${p.id}`} style={{ textDecoration: "underline" }}>
                     Editar →
                   </Link>
+                  <DeleteButton id={p.id} />
                 </td>
               </tr>
             ))}

@@ -2,25 +2,33 @@ import Image from 'next/image'
 import Link from 'next/link'
 import ProductGridClient from '@/components/ProductGridClient'
 import { headers } from "next/headers";
+import { createClient } from '@/lib/supabase/server';
 
 const formatPLN = (n: number) =>
   new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN" }).format(n);
 
 const mockProducts = [
   { id: 1, name: 'Sazón Lopeza', price_estimated: 15.99, image_url: '/placeholder.png', category: { slug: 'sazonadores' } },
-  { id: 2, name: 'Ají Amarillo', price_estimated: 12.50, image_url: '/placeholder.png', category: { slug: 'ajies' } },
+  { id: 2, name: 'Ají Amarillo', price_estimated: 12.50, image_url: '/placeholder.png', category: { slug: 'pastas-y-salsas' } },
   { id: 3, name: 'Culantro Fresco', price_estimated: 8.99, image_url: '/placeholder.png', category: { slug: 'sazonadores' } },
   { id: 4, name: 'Tari en Polvo', price_estimated: 10.00, image_url: '/placeholder.png', category: { slug: 'sazonadores' } },
 ]
 
-const categories = [
-  { name: "Condimentos y Especies", slug: "sazonadores" },
-  { name: "Granos", slug: "granos" },
-  { name: "Bebidas", slug: "bebidas" },
-  { name: "Snacks", slug: "snacks" },
-  { name: "Pastas y salsas", slug: "ajies" },
-  { name: "Marcas", slug: "marcas" },
-];
+async function getCategories() {
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from("categories")
+      .select("name, slug")
+      .order("name", { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return [];
+  }
+}
 
 async function getProducts() {
   try {
@@ -49,7 +57,8 @@ export default async function ProductosPage({ searchParams }: { searchParams: Pr
   const categoria = typeof params.categoria === 'string' ? params.categoria : undefined
   const query = typeof params.query === 'string' ? params.query : undefined
 
-  const label = categories.find(c => c.slug === categoria)?.name ?? "Productos"
+  const categories = await getCategories()
+  const label = categories.find((c: any) => c.slug === categoria)?.name ?? "Productos"
 
   let products = await getProducts()
 
@@ -70,3 +79,4 @@ export default async function ProductosPage({ searchParams }: { searchParams: Pr
     </main>
   );
 }
+

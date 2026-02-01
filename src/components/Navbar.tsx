@@ -9,7 +9,7 @@ const categories = [
   { name: 'Bebidas', slug: 'bebidas' },
   { name: 'Granos', slug: 'granos' },
   { name: 'Snacks', slug: 'snacks' },
-  { name: 'Pastas y salsas', slug: 'ajies' },
+  { name: 'Pastas y salsas', slug: 'pastas-y-salsas' },
   { name: 'Marcas', slug: 'marcas' },
 ];
 

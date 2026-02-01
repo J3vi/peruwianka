@@ -1,4 +1,13 @@
-- [x] Edit src/app/page.tsx: Change mockProducts image_url from '/placeholder.jpg' to '/placeholder.png', add import { headers } from "next/headers";, replace getProducts() with the new version using headers.
-- [x] Edit src/app/productos/page.tsx: Add import { headers } from "next/headers";, replace getProducts() with the new version using headers.
+# TODO: Agregar botón "Eliminar" en panel admin productos
 
-deploy test
+## Pasos completados:
+- [x] 1. Agregar endpoint DELETE en `src/app/api/admin/productos/[id]/route.ts`
+- [x] 2. Crear componente `DeleteButton.tsx` en `src/app/admin/productos/`
+- [x] 3. Actualizar `page.tsx` para usar el botón Eliminar
+
+## Notas:
+- Ruta del fetch: `/api/admin/productos/` + id
+- Mensaje confirmación: "Esta acción no se puede deshacer."
+- Si ok: router.refresh() + alert("Eliminado")
+- Si error: alert("No se pudo eliminar")
+

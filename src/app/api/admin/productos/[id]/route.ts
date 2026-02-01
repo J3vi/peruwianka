@@ -15,6 +15,30 @@ function isAdminEmail(email: string | null | undefined) {
   return !!email && admins.includes(email.toLowerCase());
 }
 
+export async function DELETE(req: Request, ctx: { params: { id: string } }) {
+  const supabaseAuth = await createClient();
+  const supabaseAdmin = createServiceClient();
+
+  const { data: userData } = await supabaseAuth.auth.getUser();
+  const user = userData?.user;
+
+  if (!user) return NextResponse.json({ ok: false, error: "No auth" }, { status: 401 });
+  if (!isAdminEmail(user.email)) return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
+
+  const id = Number(ctx.params.id);
+  if (!Number.isFinite(id)) {
+    return NextResponse.json({ ok: false, error: "Invalid id" }, { status: 400 });
+  }
+
+  const { error } = await supabaseAdmin.from("products").delete().eq("id", id);
+
+  if (error) {
+    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true });
+}
+
 type PatchBody = Partial<{
   name: string;
   slug: string;
