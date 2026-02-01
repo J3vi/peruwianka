@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useCart } from '@/hooks/useCart'
 
 const formatPLN = (n: number) =>
@@ -55,31 +56,15 @@ export default function CartDropdown({ disableAutoOpen }: { disableAutoOpen: boo
         className="relative inline-flex items-center justify-center rounded-full p-2 hover:bg-gray-100"
         aria-label="Carrito"
       >
-        {/* icon carrito (simple) */}
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M6 6h15l-2 9H8L6 6Z"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M6 6 5 3H2"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-          />
-          <path
-            d="M9 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
-            stroke="currentColor"
-            strokeWidth="1.8"
-          />
-          <path
-            d="M18 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
-            stroke="currentColor"
-            strokeWidth="1.8"
-          />
-        </svg>
+        {/* icon carrito (mascota) */}
+        <Image
+          src="/icon.png"
+          alt=""
+          width={26}
+          height={26}
+          className="h-[26px] w-[26px]"
+          priority
+        />
 
         {/* badge */}
         <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-yellow-400 px-1 text-xs font-bold text-black">
