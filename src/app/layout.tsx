@@ -14,7 +14,10 @@ const inter = Inter({ subsets: ["latin"] });
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: "Peruwianka",
+  title: {
+    default: "Peruwianka — Tienda peruana",
+    template: "%s — Peruwianka",
+  },
   description: "Tienda online de productos peruanos",
 };
 
@@ -37,3 +40,4 @@ export default function RootLayout({
     </html>
   );
 }
+

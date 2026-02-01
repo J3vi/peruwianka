@@ -58,11 +58,11 @@ export default function CartDropdown({ disableAutoOpen }: { disableAutoOpen: boo
       >
         {/* icon carrito (mascota) */}
         <Image
-          src="/icon.png"
+          src="/mascota-peruwianka_cesta.png"
           alt=""
           width={26}
           height={26}
-          className="h-[26px] w-[26px]"
+          className="h-[30px] w-[30px]"
           priority
         />
 
