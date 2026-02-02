@@ -38,7 +38,7 @@ export default function RootLayout({
         <ToastHost />
         <AuthRefresh />
         <WhatsAppFloating />
-        <GoogleAnalytics gaId="G-44D5OZB26Y" />
+        <GoogleAnalytics gaId="G-44D50ZB26Y" />
       </body>
     </html>
   );
