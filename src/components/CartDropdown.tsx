@@ -13,8 +13,8 @@ export default function CartDropdown({ disableAutoOpen }: { disableAutoOpen: boo
   const [open, setOpen] = useState(false)
   const wrapRef = useRef<HTMLDivElement | null>(null)
 
-  const total = useMemo(() => getTotal(), [cart, getTotal])
-  const count = useMemo(() => getCount(), [cart, getCount])
+  const total = useMemo(() => getTotal(), [getTotal])
+  const count = useMemo(() => getCount(), [getCount])
 
   // cerrar al hacer click fuera
   useEffect(() => {
@@ -90,9 +90,11 @@ export default function CartDropdown({ disableAutoOpen }: { disableAutoOpen: boo
               <div className="space-y-3">
                 {cart.slice(0, 4).map(item => (
                   <div key={item.productId} className="flex gap-3">
-                    <img
+                    <Image
                       src={item.image_url || '/placeholder.png'}
                       alt={item.name}
+                      width={48}
+                      height={48}
                       className="h-12 w-12 rounded-md object-cover border"
                     />
                     <div className="min-w-0 flex-1">

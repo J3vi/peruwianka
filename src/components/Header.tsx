@@ -209,12 +209,13 @@ export default function Header() {
       {/* Barra roja */}
       <div className="bg-red-600 text-white text-center text-sm py-2">
         <div className="mx-auto flex items-center justify-center gap-2 px-4">
-        <img
+        <Image
   src="/image.png"
-  alt=""
-  className="h-11 w-11 object-contain"
+  alt="Peruwianka"
+  width={64}
+  height={64}
+  className="h-12 w-auto"
 />
-
 
           <span>Envío gratis desde 220 zł</span>
         </div>

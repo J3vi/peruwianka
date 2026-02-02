@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useCallback, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -40,7 +40,7 @@ export default function CuentaPage() {
   // session checking
   const [checking, setChecking] = useState(true);
 
-  async function loadUserAndOrders() {
+  const loadUserAndOrders = useCallback(async () => {
     setOrdersError(null);
 
     const { data: u } = await supabase.auth.getUser();
@@ -85,7 +85,7 @@ export default function CuentaPage() {
     setOrders(orders);
     setOrdersLoading(false);
     console.log("ORDER SAMPLE:", orders?.[0]);
-  }
+  }, [supabase, router]);
 
   useEffect(() => {
     supabase.auth.getSession().then(() => {
@@ -97,7 +97,7 @@ export default function CuentaPage() {
       loadUserAndOrders();
     });
     return () => sub.subscription.unsubscribe();
-  }, [supabase]);
+  }, [supabase, loadUserAndOrders]);
 
   async function onLogin(e: React.FormEvent) {
     e.preventDefault();
