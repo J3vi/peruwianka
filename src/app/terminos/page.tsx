@@ -7,8 +7,8 @@ export default function Terminos() {
       <section className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">1) Información general y aceptación</h2>
         <p className="mb-4">
-Estos Términos y Condiciones ("Términos") regulan el acceso y uso del sitio web Peruwianka (el "Sitio"),
-          así como las compras realizadas a través del Sitio. Al navegar, crear una cuenta o realizar un pedido, 
+          Estos Términos y Condiciones ("Términos") regulan el acceso y uso del sitio web Peruwianka (el "Sitio"),
+          así como las compras realizadas a través del Sitio. Al navegar, crear una cuenta o realizar un pedido,
           aceptas estos Términos.
         </p>
       </section>
@@ -71,7 +71,7 @@ Estos Términos y Condiciones ("Términos") regulan el acceso y uso del sitio we
           <li>Los costos de envío se informan antes de finalizar la compra.</li>
         </ul>
         <p>
-          Nos reservamos el derecho de corregir errores tipográficos o de precio evidentes y de cancelar pedidos 
+          Nos reservamos el derecho de corregir errores tipográficos o de precio evidentes y de cancelar pedidos
           derivados de dichos errores, reembolsando cualquier pago recibido.
         </p>
       </section>
@@ -87,7 +87,7 @@ Estos Términos y Condiciones ("Términos") regulan el acceso y uso del sitio we
         </ul>
         <p className="mb-4">lo que ocurra primero.</p>
         <p>
-          Podemos rechazar o cancelar pedidos por: falta de stock, sospecha de fraude, errores de precio, 
+          Podemos rechazar o cancelar pedidos por: falta de stock, sospecha de fraude, errores de precio,
           imposibilidad de entrega u otros motivos razonables.
         </p>
       </section>
@@ -98,7 +98,7 @@ Estos Términos y Condiciones ("Términos") regulan el acceso y uso del sitio we
           Los pagos se procesan mediante proveedores externos. Los métodos disponibles se mostrarán en el checkout.
         </p>
         <p>
-          El vendedor no almacena datos completos de tarjeta. En caso de pago fallido, el pedido puede quedar 
+          El vendedor no almacena datos completos de tarjeta. En caso de pago fallido, el pedido puede quedar
           cancelado automáticamente.
         </p>
       </section>
@@ -111,7 +111,7 @@ Estos Términos y Condiciones ("Términos") regulan el acceso y uso del sitio we
           <li><strong>Dirección:</strong> el Cliente es responsable de indicar una dirección correcta y accesible.</li>
         </ul>
         <p>
-          Si el pedido vuelve por dirección incorrecta o ausencia reiterada, el Cliente puede asumir costos 
+          Si el pedido vuelve por dirección incorrecta o ausencia reiterada, el Cliente puede asumir costos
           adicionales de reenvío.
         </p>
       </section>
@@ -119,7 +119,7 @@ Estos Términos y Condiciones ("Términos") regulan el acceso y uso del sitio we
       <section className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">10) Derecho de desistimiento (consumidores)</h2>
         <p className="mb-4">
-          Si compras como consumidor, puedes desistir del contrato dentro de los [14] días naturales desde la 
+          Si compras como consumidor, puedes desistir del contrato dentro de los [14] días naturales desde la
           recepción del pedido, sin necesidad de justificación, salvo excepciones legales.
         </p>
         <p className="mb-4">
@@ -131,7 +131,7 @@ Estos Términos y Condiciones ("Términos") regulan el acceso y uso del sitio we
           <li>Reembolsaremos el importe del producto y, cuando aplique, el coste estándar de envío inicial.</li>
           <li>El reembolso se realizará usando el mismo medio de pago, salvo acuerdo distinto.</li>
           <li>
-            El Cliente debe devolver los productos sin demora indebida y en un plazo máximo de [14] días desde 
+            El Cliente debe devolver los productos sin demora indebida y en un plazo máximo de [14] días desde
             la comunicación del desistimiento.
           </li>
         </ul>
@@ -144,7 +144,7 @@ Estos Términos y Condiciones ("Términos") regulan el acceso y uso del sitio we
           </li>
         </ul>
         <p className="mt-4 text-sm text-gray-600">
-          (Peruwianka vende alimentos: algunas categorías pueden estar excluidas del desistimiento si se cumplen 
+          (Peruwianka vende alimentos: algunas categorías pueden estar excluidas del desistimiento si se cumplen
           las condiciones legales. Se informará en la ficha del producto cuando aplique.)
         </p>
       </section>
@@ -153,12 +153,12 @@ Estos Términos y Condiciones ("Términos") regulan el acceso y uso del sitio we
         <h2 className="text-2xl font-semibold mb-4">11) Devoluciones, cambios y reembolsos</h2>
         <ul className="list-disc pl-6 space-y-2 mb-4">
           <li>
-            <strong>Condición:</strong> los productos deben devolverse en buen estado y, si aplica, sin abrir/dañar 
+            <strong>Condición:</strong> los productos deben devolverse en buen estado y, si aplica, sin abrir/dañar
             el precinto original.
           </li>
           <li><strong>Coste de devolución:</strong> [PENDIENTE: a cargo del cliente / a cargo del vendedor en caso de error].</li>
           <li>
-            Si recibes un producto equivocado o dañado, contáctanos dentro de [48/72] horas con fotos del paquete 
+            Si recibes un producto equivocado o dañado, contáctanos dentro de [48/72] horas con fotos del paquete
             y del producto a [EMAIL].
           </li>
         </ul>
@@ -182,8 +182,8 @@ Estos Términos y Condiciones ("Términos") regulan el acceso y uso del sitio we
       <section className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">13) Garantías y conformidad (consumidores)</h2>
         <p className="mb-4">
-          Cuando aplique la normativa de consumo, los productos deben ser conformes con el contrato. 
-          Si existe falta de conformidad, el Cliente puede tener derecho a reparación, sustitución, reducción 
+          Cuando aplique la normativa de consumo, los productos deben ser conformes con el contrato.
+          Si existe falta de conformidad, el Cliente puede tener derecho a reparación, sustitución, reducción
           del precio o resolución, según corresponda y conforme a la ley aplicable.
         </p>
       </section>
@@ -202,7 +202,7 @@ Estos Términos y Condiciones ("Términos") regulan el acceso y uso del sitio we
       <section className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">15) Propiedad intelectual</h2>
         <p className="mb-4">
-          El contenido del Sitio (marca, logo, textos, diseño, imágenes) pertenece a Peruwianka o a sus licenciantes. 
+          El contenido del Sitio (marca, logo, textos, diseño, imágenes) pertenece a Peruwianka o a sus licenciantes.
           No puedes reproducirlo o explotarlo sin autorización, salvo uso personal y no comercial permitido por ley.
         </p>
       </section>
@@ -229,8 +229,8 @@ Estos Términos y Condiciones ("Términos") regulan el acceso y uso del sitio we
       <section className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">18) Modificaciones de los términos</h2>
         <p className="mb-4">
-          Podemos actualizar estos Términos para reflejar cambios legales, operativos o técnicos. 
-          Publicaremos la versión vigente con su fecha de actualización. Los pedidos realizados antes del 
+          Podemos actualizar estos Términos para reflejar cambios legales, operativos o técnicos.
+          Publicaremos la versión vigente con su fecha de actualización. Los pedidos realizados antes del
           cambio se rigen por la versión aplicable al momento de compra.
         </p>
       </section>
@@ -238,8 +238,8 @@ Estos Términos y Condiciones ("Términos") regulan el acceso y uso del sitio we
       <section className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">19) Ley aplicable y jurisdicción</h2>
         <p className="mb-4">
-          Estos Términos se rigen por la ley de [Polonia] y las normas de protección al consumidor aplicables. 
-          En caso de disputa, se buscará una solución amistosa; si no fuera posible, el asunto se someterá a 
+          Estos Términos se rigen por la ley de [Polonia] y las normas de protección al consumidor aplicables.
+          En caso de disputa, se buscará una solución amistosa; si no fuera posible, el asunto se someterá a
           los tribunales competentes, sin perjuicio de los derechos del consumidor.
         </p>
       </section>

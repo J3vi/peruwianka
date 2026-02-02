@@ -5,8 +5,8 @@ export default function PoliticaDePrivacidad() {
       <p className="text-gray-500 mb-8">Fecha de última actualización: [dd/mm/aaaa]</p>
 
       <p className="mb-8">
-Gracias por visitar nuestro sitio web (el "Sitio"). La protección de tu privacidad es importante para nosotros.
-        Esta Política explica cómo tratamos tus datos personales cuando utilizas el Sitio, creas una cuenta, realizas 
+        Gracias por visitar nuestro sitio web (el "Sitio"). La protección de tu privacidad es importante para nosotros.
+        Esta Política explica cómo tratamos tus datos personales cuando utilizas el Sitio, creas una cuenta, realizas
         una compra o te contactas con nosotros.
       </p>
 
@@ -25,7 +25,7 @@ Gracias por visitar nuestro sitio web (el "Sitio"). La protección de tu privaci
           <li>Teléfono (opcional): [TELÉFONO]</li>
         </ul>
         <p className="mt-4 text-sm text-gray-600">
-          Si aún no tienes razón social/NIP definidos, no inventes. Pon el nombre del titular real y actualiza cuando 
+          Si aún no tienes razón social/NIP definidos, no inventes. Pon el nombre del titular real y actualiza cuando
           formalices la empresa. Si mientes aquí, la política no te "protege": te incrimina.
         </p>
       </section>
@@ -47,7 +47,7 @@ Gracias por visitar nuestro sitio web (el "Sitio"). La protección de tu privaci
       <section className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">3) Qué datos personales tratamos</h2>
         <p className="mb-4">Según el uso que hagas del Sitio, podemos tratar estas categorías:</p>
-        
+
         <h3 className="text-xl font-medium mb-2">A. Datos que tú nos das</h3>
         <ul className="list-disc pl-6 space-y-1 mb-4">
           <li>Identificación y contacto: nombre, apellidos, email, teléfono.</li>
@@ -59,13 +59,13 @@ Gracias por visitar nuestro sitio web (el "Sitio"). La protección de tu privaci
 
         <h3 className="text-xl font-medium mb-2">B. Datos técnicos (automáticos)</h3>
         <p className="mb-4">
-          Dirección IP, identificadores del dispositivo/navegador, logs, fecha/hora de acceso, páginas visitadas, 
+          Dirección IP, identificadores del dispositivo/navegador, logs, fecha/hora de acceso, páginas visitadas,
           cookies/tecnologías similares.
         </p>
 
         <h3 className="text-xl font-medium mb-2">C. Datos de terceros (solo si aplica)</h3>
         <p className="mb-4">
-Si pagas mediante proveedor externo, este puede confirmarnos el estado del pago (por ejemplo: "pagado/no pagado",
+          Si pagas mediante proveedor externo, este puede confirmarnos el estado del pago (por ejemplo: "pagado/no pagado",
           referencia de transacción). No almacenamos números completos de tarjeta; eso lo gestiona el proveedor de pago.
         </p>
       </section>
@@ -151,7 +151,7 @@ Si pagas mediante proveedor externo, este puede confirmarnos el estado del pago 
       <section className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">6) Transferencias internacionales</h2>
         <p className="mb-4">
-          Si alguno de nuestros proveedores está fuera del EEE (Espacio Económico Europeo), tus datos podrían transferirse 
+          Si alguno de nuestros proveedores está fuera del EEE (Espacio Económico Europeo), tus datos podrían transferirse
           usando garantías adecuadas (por ejemplo, cláusulas contractuales tipo u otros mecanismos previstos por GDPR/RODO).
         </p>
       </section>
@@ -180,7 +180,7 @@ Si pagas mediante proveedor externo, este puede confirmarnos el estado del pago 
           <li>Retirar el consentimiento cuando la base sea consentimiento (sin afectar lo anterior)</li>
         </ul>
         <p>
-          También tienes derecho a presentar una queja ante la autoridad de control en Polonia: 
+          También tienes derecho a presentar una queja ante la autoridad de control en Polonia:
           Urząd Ochrony Danych Osobowych (UODO).
         </p>
       </section>
@@ -188,8 +188,8 @@ Si pagas mediante proveedor externo, este puede confirmarnos el estado del pago 
       <section className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">9) Decisiones automatizadas y perfiles</h2>
         <p className="mb-4">
-          Podemos usar herramientas de analítica/segmentación para mejorar contenidos y marketing. 
-          No adoptamos decisiones automatizadas que produzcan efectos legales sobre ti (salvo que se indique expresamente 
+          Podemos usar herramientas de analítica/segmentación para mejorar contenidos y marketing.
+          No adoptamos decisiones automatizadas que produzcan efectos legales sobre ti (salvo que se indique expresamente
           y exista base legal).
         </p>
         <p>Puedes oponerte al marketing y ajustar cookies.</p>
@@ -212,7 +212,7 @@ Si pagas mediante proveedor externo, este puede confirmarnos el estado del pago 
       <section className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">11) Seguridad</h2>
         <p className="mb-4">
-          Aplicamos medidas técnicas y organizativas razonables para proteger los datos (control de accesos, cifrado en 
+          Aplicamos medidas técnicas y organizativas razonables para proteger los datos (control de accesos, cifrado en
           tránsito cuando aplica, registros, etc.). Aun así, ningún sistema es 100% invulnerable.
         </p>
       </section>
@@ -220,7 +220,7 @@ Si pagas mediante proveedor externo, este puede confirmarnos el estado del pago 
       <section className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">12) Cambios de esta Política</h2>
         <p className="mb-4">
-          Podemos actualizar esta Política cuando cambie el Sitio, la ley o nuestros proveedores. 
+          Podemos actualizar esta Política cuando cambie el Sitio, la ley o nuestros proveedores.
           Publicaremos la versión vigente con su fecha de actualización.
         </p>
       </section>
