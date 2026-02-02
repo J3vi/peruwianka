@@ -4,10 +4,12 @@ import Header from "@/components/Header";
 import Navbar from "@/components/Navbar";
 import ToastHost from "@/components/ToastHost";
 import WhatsAppFloating from "@/components/WhatsAppFloating";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 export const dynamic = "force-dynamic";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -36,6 +38,7 @@ export default function RootLayout({
         <ToastHost />
         <AuthRefresh />
         <WhatsAppFloating />
+        <GoogleAnalytics gaId="G-44D5OZB26Y" />
       </body>
     </html>
   );
