@@ -90,29 +90,58 @@ export default function ContactoPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-
+  
     if (!form.fullName.trim() || !form.email.trim() || !form.message.trim()) {
       setToast("Completa nombre, correo y mensaje.");
       setTimeout(() => setToast(null), 1800);
       return;
     }
+  
     if (!form.accept) {
       setToast("Acepta la política de privacidad para enviar.");
       setTimeout(() => setToast(null), 2000);
       return;
     }
-
+  
     setSending(true);
-    try {
-      // Por ahora: solo UI (placeholder). Luego lo conectamos a /api/contacto.
-      await new Promise(r => setTimeout(r, 700));
-      setToast("Mensaje enviado ✅ Te responderemos lo antes posible.");
-      setForm(prev => ({ ...prev, message: "", orderId: "", file: null }));
-      setTimeout(() => setToast(null), 2200);
-    } finally {
-      setSending(false);
-    }
+try {
+  const res = await fetch("/api/contacto", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      topic: form.topic,
+      category: form.category,
+      subcategory: form.subcategory,
+      orderId: form.orderId,
+      message: form.message,
+      fullName: form.fullName,
+      email: form.email,
+      phone: form.phone,
+    }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    setToast(data?.error ?? "No se pudo enviar. Intenta otra vez.");
+    setTimeout(() => setToast(null), 2500);
+    return;
   }
+
+  setToast("Mensaje enviado ✅ Te responderemos lo antes posible.");
+  setTimeout(() => setToast(null), 1800);
+
+  // opcional: limpiar campos
+  // setForm(initialState)
+} catch (e: any) {
+  setToast("Error de red. Intenta otra vez.");
+  setTimeout(() => setToast(null), 2500);
+} finally {
+  setSending(false);
+}
+
+  }
+  
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">

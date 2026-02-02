@@ -31,7 +31,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-gray-700 mt-8 pt-8 text-center">
-          <p>&copy; 2024 peruwianka. Todos los derechos reservados.</p>
+          <p>&copy; 2026 peruwianka. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>
