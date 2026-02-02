@@ -64,11 +64,10 @@ export default function PoliticaDePrivacidad() {
         </p>
 
         <h3 className="text-xl font-medium mb-2">C. Datos de terceros (solo si aplica)</h3>
-<p className="mb-4">
-  Si pagas mediante proveedor externo, este puede confirmarnos el estado del pago (por ejemplo: &quot;pagado/no pagado&quot;,
-  referencia de transacci&oacute;n). No almacenamos n&uacute;meros completos de tarjeta; eso lo gestiona el proveedor de pago.
-</p>
-
+        <p className="mb-4">
+          Si pagas mediante proveedor externo, este puede confirmarnos el estado del pago (por ejemplo: "pagado/no pagado",
+          referencia de transacci&oacute;n). No almacenamos n&uacute;meros completos de tarjeta; eso lo gestiona el proveedor de pago.
+        </p>
       </section>
 
       <section className="mb-8">
@@ -120,7 +119,7 @@ export default function PoliticaDePrivacidad() {
             <br />
             Base legal: consentimiento (art. 6.1.a).
             <br />
-            Puedes retirar tu consentimiento en cualquier momento (p. ej., link &quot;darse de baja&quot;).
+            Puedes retirar tu consentimiento en cualquier momento (p. ej., link "darse de baja").
           </li>
           <li>
             <strong>Anal&iacute;tica, medici&oacute;n y publicidad (cookies no esenciales, si las usas)</strong>

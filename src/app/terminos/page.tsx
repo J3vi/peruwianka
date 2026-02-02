@@ -128,7 +128,7 @@ export default function Terminos() {
 
         <h3 className="text-xl font-medium mb-2">Efectos del desistimiento:</h3>
         <ul className="list-disc pl-6 space-y-2 mb-4">
-          <li>Reembolsaremos el importe del producto y, cuando aplique, el coste est&aacute;ndar de env&iacute;o inicial.</li>
+          <li>Reembolaremos el importe del producto y, cuando aplique, el coste est&aacute;ndar de env&iacute;o inicial.</li>
           <li>El reembolso se realizar&aacute; usando el mismo medio de pago, salvo acuerdo distinto.</li>
           <li>
             El Cliente debe devolver los productos sin demora indebida y en un plazo m&aacute;ximo de [14] d&iacute;as desde
