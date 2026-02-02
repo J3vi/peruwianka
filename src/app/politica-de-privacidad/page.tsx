@@ -5,7 +5,7 @@ export default function PoliticaDePrivacidad() {
       <p className="text-gray-500 mb-8">Fecha de última actualización: [dd/mm/aaaa]</p>
 
       <p className="mb-8">
-        Gracias por visitar nuestro sitio web (el "Sitio"). La protección de tu privacidad es importante para nosotros. 
+Gracias por visitar nuestro sitio web (el "Sitio"). La protección de tu privacidad es importante para nosotros.
         Esta Política explica cómo tratamos tus datos personales cuando utilizas el Sitio, creas una cuenta, realizas 
         una compra o te contactas con nosotros.
       </p>
@@ -65,7 +65,7 @@ export default function PoliticaDePrivacidad() {
 
         <h3 className="text-xl font-medium mb-2">C. Datos de terceros (solo si aplica)</h3>
         <p className="mb-4">
-          Si pagas mediante proveedor externo, este puede confirmarnos el estado del pago (por ejemplo: "pagado/no pagado", 
+Si pagas mediante proveedor externo, este puede confirmarnos el estado del pago (por ejemplo: "pagado/no pagado",
           referencia de transacción). No almacenamos números completos de tarjeta; eso lo gestiona el proveedor de pago.
         </p>
       </section>

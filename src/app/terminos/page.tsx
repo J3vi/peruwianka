@@ -7,7 +7,7 @@ export default function Terminos() {
       <section className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">1) Información general y aceptación</h2>
         <p className="mb-4">
-          Estos Términos y Condiciones ("Términos") regulan el acceso y uso del sitio web Peruwianka (el "Sitio"), 
+Estos Términos y Condiciones ("Términos") regulan el acceso y uso del sitio web Peruwianka (el "Sitio"),
           así como las compras realizadas a través del Sitio. Al navegar, crear una cuenta o realizar un pedido, 
           aceptas estos Términos.
         </p>
