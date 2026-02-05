@@ -61,36 +61,70 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Body inválido" }, { status: 400 });
   }
 
+  // 3) Validar campos obligatorios
   const name = String(body.name || "").trim();
-  const slug = String(body.slug || "").trim();
+  const description = String(body.description || "").trim();
+  const price = Number(body.price);
+  const weight = Number(body.weight);
+  const category_id = body.category_id;
+  const brand_id = body.brand_id;
+  const image_url = String(body.image_url || "").trim();
 
-  if (!name || !slug) {
+  const errors: string[] = [];
+
+  if (!name) errors.push("name");
+  if (!description) errors.push("description");
+  if (!price || price <= 0) errors.push("price (mayor a 0)");
+  if (!weight || weight <= 0) errors.push("weight (mayor a 0)");
+  if (!category_id) errors.push("category_id");
+  if (!brand_id) errors.push("brand_id");
+  if (!image_url) errors.push("image_url");
+
+  if (errors.length > 0) {
     return NextResponse.json(
-      { error: "Faltan campos obligatorios: name, slug" },
+      { error: `Faltan campos obligatorios: ${errors.join(", ")}` },
       { status: 400 }
     );
   }
 
-  // 3) Insert con service role (evita RLS)
+  // Validar discount_percent (0-90)
+  let discount_percent = Number(body.discount_percent ?? 0);
+  if (discount_percent < 0 || discount_percent > 90) {
+    discount_percent = 0;
+  }
+
+  // Generar slug si no viene
+  let slug = String(body.slug || "").trim();
+  if (!slug && name) {
+    slug = name
+      .toLowerCase()
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  // 4) Insert con service role (evita RLS)
   const supabaseAdmin = createServiceClient();
 
   const payload = {
     name,
     slug,
-    description: body.description ?? null,
-    price_estimated: Number.isFinite(Number(body.price_estimated)) ? Number(body.price_estimated) : 0,
-    weight: Number.isFinite(Number(body.weight)) ? Math.trunc(Number(body.weight)) : 0,
-    discount_percent: Number.isFinite(Number(body.discount_percent)) ? Math.trunc(Number(body.discount_percent)) : 0,
+    description: description ?? null,
+    price,
+    weight: Math.trunc(weight),
+    discount_percent: Math.trunc(discount_percent),
     is_active: typeof body.is_active === "boolean" ? body.is_active : true,
-    category_id: body.category_id ?? null,
-    brand_id: body.brand_id ?? null,
-    image_url: body.image_url ?? null,
+    category_id,
+    brand_id,
+    image_url,
   };
 
   const { data, error } = await supabaseAdmin
     .from("products")
     .insert(payload)
-    .select("id,name,slug,description,price_estimated,weight,image_url,category_id,brand_id,is_active,discount_percent,created_at")
+    .select("id,name,slug,description,price,weight,image_url,category_id,brand_id,is_active,discount_percent,created_at")
     .single();
 
   if (error) {
