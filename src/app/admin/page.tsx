@@ -78,17 +78,17 @@ export default function AdminPage() {
           <div className="text-gray-600">Crear / editar / desactivar</div>
         </Link>
 
-        <div className="rounded-2xl border bg-white p-6 opacity-60">
+        <Link href="/admin/descuentos" className="rounded-2xl border bg-white p-6 shadow-sm hover:shadow">
           <div className="text-2xl">🏷️</div>
           <div className="mt-3 text-xl font-semibold">Descuentos</div>
-          <div className="text-gray-600">Próximo</div>
-        </div>
+          <div className="text-gray-600">Crear / editar / desactivar</div>
+        </Link>
 
-        <div className="rounded-2xl border bg-white p-6 opacity-60">
+        <Link href="/admin/banners" className="rounded-2xl border bg-white p-6 shadow-sm hover:shadow">
           <div className="text-2xl">🖼️</div>
-          <div className="mt-3 text-xl font-semibold">Imágenes</div>
-          <div className="text-gray-600">Próximo</div>
-        </div>
+          <div className="mt-3 text-xl font-semibold">Banners</div>
+          <div className="text-gray-600">Crear / editar / desactivar</div>
+        </Link>
       </div>
     </main>
   );
