@@ -64,7 +64,7 @@ export async function POST(request: Request) {
   // 3) Validar campos obligatorios
   const name = String(body.name || "").trim();
   const description = String(body.description || "").trim();
-  const price = Number(body.price);
+  const price_estimated = Number(body.price_estimated ?? body.price);
   const weight = Number(body.weight);
   const category_id = body.category_id;
   const brand_id = body.brand_id;
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
 
   if (!name) errors.push("name");
   if (!description) errors.push("description");
-  if (!price || price <= 0) errors.push("price (mayor a 0)");
+  if (!price_estimated || price_estimated <= 0) errors.push("price_estimated (mayor a 0)");
   if (!weight || weight <= 0) errors.push("weight (mayor a 0)");
   if (!category_id) errors.push("category_id");
   if (!brand_id) errors.push("brand_id");
@@ -112,7 +112,7 @@ export async function POST(request: Request) {
     name,
     slug,
     description: description ?? null,
-    price,
+    price_estimated,
     weight: Math.trunc(weight),
     discount_percent: Math.trunc(discount_percent),
     is_active: typeof body.is_active === "boolean" ? body.is_active : true,
@@ -124,7 +124,7 @@ export async function POST(request: Request) {
   const { data, error } = await supabaseAdmin
     .from("products")
     .insert(payload)
-    .select("id,name,slug,description,price,weight,image_url,category_id,brand_id,is_active,discount_percent,created_at")
+    .select("id,name,slug,description,price_estimated,weight,image_url,category_id,brand_id,is_active,discount_percent,created_at")
     .single();
 
   if (error) {
