@@ -1,14 +1,15 @@
 -- 1) Insert categories (si ya existen, no duplica por slug)
 INSERT INTO public.categories (name, slug, icon)
 VALUES
-  ('Sazonadores','sazonadores','🍲'),
+  ('Condimentos y Especies','Condimentos y Especies','🍲'),
   ('ajies','ajies','🌶️'),
   ('Granos','granos','🌽'),
   ('Bebidas','bebidas','🥤'),
   ('Snacks','snacks','🍿'),
   ('Conservas','conservas','🥫'),
   ('Hierbas','hierbas','🌿'),
-  ('Especias','especias','🧂')
+  ('Especias','especias','🧂'),
+  ('Pack','pack','📦')
 ON CONFLICT (slug) DO NOTHING;
 
 -- 2) Insert brands (si ya existen, no duplica por slug)
@@ -37,7 +38,7 @@ SELECT
   b.id as brand_id
 FROM (
   VALUES
-  ('Sazón Lopeza Completo','sazon-lopeza-completo','Mezcla completa de sazonadores peruanos',15.99,200,'/placeholder.png','sazonadores','sazon-lopeza'),
+  ('Sazón Lopeza Completo','sazon-lopeza-completo','Mezcla completa de Condimentos y Especies peruanos',15.99,200,'/placeholder.png','Condimentos y Especies','sazon-lopeza'),
   ('Ají Amarillo en Pasta','aji-amarillo-pasta','Pasta de ají amarillo fresco',12.50,150,'/placeholder.png','ajies','sibarita'),
   ('Culantro Fresco','culantro-fresco','Culantro fresco de los Andes',8.99,100,'/placeholder.png','hierbas','cusco-herbs'),
   ('Tari en Polvo','tari-polvo','Polvo de tari para aderezos',10.00,50,'/placeholder.png','especias','lima-spices'),
@@ -56,7 +57,8 @@ FROM (
   ('Cacao en Polvo','cacao-polvo','Cacao puro amazónico',16.99,250,'/placeholder.png','especias','amazon-flavors'),
   ('Café Orgánico','cafe-organico','Café de altura orgánico',19.99,500,'/placeholder.png','bebidas','andes-foods'),
   ('Yuca Fresca','yuca-fresca','Yuca fresca de la selva',3.99,1000,'/placeholder.png','granos','amazon-flavors'),
-  ('Maní Salado','mani-salado','Maní tostado con sal',5.50,200,'/placeholder.png','snacks','peru-gourmet')
+  ('Maní Salado','mani-salado','Maní tostado con sal',5.50,200,'/placeholder.png','snacks','peru-gourmet'),
+  ('Pack Descubrimiento Peruano','pack-descubrimiento-peruano','Pack con los productos más emblemáticos del Perú',45.99,2000,'/placeholder.png','pack','peru-gourmet')
 ) AS p(name, slug, description, price_estimated, weight, image_url, category_slug, brand_slug)
 JOIN public.categories c ON c.slug = p.category_slug
 JOIN public.brands b ON b.slug = p.brand_slug

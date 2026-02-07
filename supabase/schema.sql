@@ -31,7 +31,9 @@ CREATE TABLE products (
   brand_id INTEGER REFERENCES brands(id),
   is_active BOOLEAN DEFAULT TRUE,
   discount_percent NUMERIC(5,2) DEFAULT 0,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  discount_until TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Profiles table

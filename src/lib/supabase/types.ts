@@ -26,6 +26,8 @@ export interface Product {
   is_active: boolean
   created_at: string
   discount_percent: number | null
+  discount_until?: string | null
+  updated_at?: string
   category?: Category
   brand?: Brand
 }
@@ -49,4 +51,12 @@ export interface Profile {
   id: string
   role: string
   created_at: string
+}
+
+export interface PaginationData {
+  page: number
+  limit: number
+  total: number
+  totalPages: number
+  hasMore: boolean
 }
