@@ -217,7 +217,7 @@ export default function Header() {
   className="h-12 w-auto"
 />
 
-          <span>Envío gratis desde 220 zł</span>
+          <span>Envío gratis desde 199 zł</span>
         </div>
       </div>
 

@@ -1,6 +1,10 @@
+import { Suspense } from "react"
 import Image from 'next/image'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import ProductGridClient from '@/components/ProductGridClient'
+import ProductFilters from '@/components/ProductFilters'
+import Pagination from '@/components/Pagination'
 import { headers } from "next/headers";
 import { createClient } from '@/lib/supabase/server';
 
@@ -8,11 +12,14 @@ const formatPLN = (n: number) =>
   new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN" }).format(n);
 
 const mockProducts = [
-  { id: 1, name: 'Sazón Lopeza', price_estimated: 15.99, image_url: '/placeholder.png', category: { slug: 'sazonadores' } },
+  { id: 1, name: 'Sazón Lopeza', price_estimated: 15.99, image_url: '/placeholder.png', category: { slug: 'condimentos-y-especias' } },
   { id: 2, name: 'Ají Amarillo', price_estimated: 12.50, image_url: '/placeholder.png', category: { slug: 'pastas-y-salsas' } },
-  { id: 3, name: 'Culantro Fresco', price_estimated: 8.99, image_url: '/placeholder.png', category: { slug: 'sazonadores' } },
-  { id: 4, name: 'Tari en Polvo', price_estimated: 10.00, image_url: '/placeholder.png', category: { slug: 'sazonadores' } },
+  { id: 3, name: 'Culantro Fresco', price_estimated: 8.99, image_url: '/placeholder.png', category: { slug: 'condimentos-y-especias' } },
+  { id: 4, name: 'Tari en Polvo', price_estimated: 10.00, image_url: '/placeholder.png', category: { slug: 'condimentos-y-especias' } },
 ]
+
+// Configuración de paginación
+const DEFAULT_LIMIT = 20;
 
 async function getCategories() {
   try {
@@ -30,13 +37,38 @@ async function getCategories() {
   }
 }
 
-async function getProducts() {
+async function getProducts(searchParams: { [key: string]: string | string[] | undefined }) {
   try {
     const h = headers();
     const host = h.get("host");
     const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
 
-    const res = await fetch(`${protocol}://${host}/api/products`, {
+    // Construir query params para la API
+    const params = new URLSearchParams();
+    const sort = typeof searchParams.sort === 'string' ? searchParams.sort : 'newest';
+    const offers = searchParams.offers;
+    const categoria = typeof searchParams.categoria === 'string' ? searchParams.categoria : undefined;
+    const query = typeof searchParams.q === 'string' ? searchParams.q : undefined;
+    const page = typeof searchParams.page === 'string' ? parseInt(searchParams.page, 10) : 1;
+
+    // Agregar todos los parámetros relevantes
+    if (sort !== 'newest') params.set('sort', sort);
+    if (offers === '1') params.set('offers', '1');
+    if (categoria) params.set('categoria', categoria);
+    if (query) params.set('q', query);
+    params.set('page', String(page));
+    params.set('limit', String(DEFAULT_LIMIT));
+
+    const url = `${protocol}://${host}/api/products?${params.toString()}`;
+
+    // DEBUG LOGS
+    console.log("=== DEBUG FRONTEND ===");
+    console.log("PARAMS received:", JSON.stringify(searchParams));
+    console.log("categoria extracted:", categoria);
+    console.log("FETCHING URL:", url);
+    // END DEBUG
+
+    const res = await fetch(url, {
       cache: "no-store",
     });
 
@@ -44,38 +76,65 @@ async function getProducts() {
 
     const json = await res.json();
 
-    // ✅ tu API responde { products: [...] }
-    return Array.isArray(json) ? json : (json.products ?? []);
+    // La API responde { products: [...], pagination: {...} }
+    const products = Array.isArray(json) ? json : (json.products ?? []);
+    const pagination = json.pagination;
+
+    return { products, pagination };
   } catch (error) {
     console.error("Error fetching products:", error);
-    return mockProducts;
+    return { products: mockProducts, pagination: { total: mockProducts.length, page: 1, totalPages: 1, hasMore: false } };
   }
 }
 
 export default async function ProductosPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
-  const params = await searchParams
-  const categoria = typeof params.categoria === 'string' ? params.categoria : undefined
-  const query = typeof params.query === 'string' ? params.query : undefined
+  const params = await searchParams;
+  const categoria = typeof params.categoria === 'string' ? params.categoria : undefined;
+  const query = typeof params.q === 'string' ? params.q : undefined;
 
-  const categories = await getCategories()
-  const label = categories.find((c: any) => c.slug === categoria)?.name ?? "Productos"
+  console.log("=== DEBUG PAGE ===");
+  console.log("params:", JSON.stringify(params));
+  console.log("params.categoria:", params.categoria);
+  console.log("categoria extracted:", categoria);
+  console.log("=== END DEBUG PAGE ===");
 
-  let products = await getProducts()
+  const categories = await getCategories();
+  const label = categories.find((c: any) => c.slug === categoria)?.name ?? "Productos";
 
-  if (categoria) {
-    products = products.filter((p: any) => p.category?.slug === categoria)
-  }
+  const { products, pagination } = await getProducts(params);
 
-  if (query) {
-    products = products.filter((p: any) => p.name.toLowerCase().includes(query.toLowerCase()))
+  // Si page es mayor que totalPages, ajustar a la última página válida
+  if (pagination.totalPages > 0 && pagination.page > pagination.totalPages) {
+    const validParams = new URLSearchParams();
+    validParams.set('page', String(pagination.totalPages));
+    // Mantener otros filtros
+    if (params.sort && params.sort !== 'newest') validParams.set('sort', String(params.sort));
+    if (params.offers === '1') validParams.set('offers', '1');
+    if (categoria) validParams.set('categoria', categoria);
+    if (query) validParams.set('q', query);
+    redirect(`/productos?${validParams.toString()}`);
   }
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">{label}</h1>
+      {/* Saludo */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold mb-2">{label}</h1>
+        <p className="text-[#FF3131] font-medium">¿Cómo estás, kausa?</p>
+      </div>
+
+      {/* Filtros y Ordenamiento */}
+      <Suspense fallback={null}>
+        <ProductFilters totalProducts={pagination.total} />
+      </Suspense>
 
       {/* Products Grid */}
       <ProductGridClient products={products} />
+
+      {/* Paginación */}
+      <Suspense fallback={null}>
+        <Pagination pagination={pagination} />
+      </Suspense>
     </main>
   );
 }

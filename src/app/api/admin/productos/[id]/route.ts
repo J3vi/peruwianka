@@ -50,6 +50,7 @@ type PatchBody = Partial<{
   brand_id: number;
   is_active: boolean;
   discount_percent: number;
+  discount_until: string | null;
 }>;
 
 export async function PATCH(req: Request, ctx: { params: { id: string } }) {
@@ -86,6 +87,9 @@ export async function PATCH(req: Request, ctx: { params: { id: string } }) {
   if (typeof body.brand_id === "number") update.brand_id = body.brand_id;
   if (typeof body.is_active === "boolean") update.is_active = body.is_active;
   if (typeof body.discount_percent === "number") update.discount_percent = body.discount_percent;
+  if (body.discount_until === null || typeof body.discount_until === "string") {
+    update.discount_until = body.discount_until;
+  }
 
   if (Object.keys(update).length === 0) {
     return NextResponse.json({ error: "Nothing to update" }, { status: 400 });

@@ -86,7 +86,8 @@ export async function POST(request: Request) {
       }
     })
 
-    const shippingCost = totalEstimated >= 220 ? 0 : 15
+    const FREE_SHIPPING_THRESHOLD = 199;
+    const shippingCost = totalEstimated >= FREE_SHIPPING_THRESHOLD ? 0 : 20
 
     // Create order
     const { data: order, error: orderError } = await supabaseAdmin

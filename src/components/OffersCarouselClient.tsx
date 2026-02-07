@@ -5,17 +5,27 @@ import Link from "next/link";
 import { useMemo, useRef } from "react";
 import { useCart } from "@/hooks/useCart";
 import { useFavorites } from "@/hooks/useFavorites";
-
-type Product = {
-  id: string;
-  name: string;
-  image_url?: string | null;
-  price_estimated: number;
-  category_slug?: string | null;
-};
+import type { Product } from "@/lib/supabase/types";
 
 const formatPLN = (n: number) =>
   new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN" }).format(n);
+
+// Tipo local que extiende Product con category_slug para el carrusel
+interface ProductWithSlug extends Product {
+  category_slug?: string | null;
+}
+
+/**
+ * Verifica si un descuento está activo según la regla:
+ * discount_percent > 0 AND (discount_until IS NULL OR discount_until > NOW())
+ */
+function isDiscountActive(product: Product): boolean {
+  const discount = Number(product.discount_percent ?? 0);
+  if (discount <= 0) return false;
+  if (!product.discount_until) return true;
+  const until = new Date(product.discount_until).getTime();
+  return until > Date.now();
+}
 
 function toast(message: string, type: "success" | "error" | "info" = "success") {
   window.dispatchEvent(new CustomEvent("peruwianka:toast", { detail: { message, type } }));
@@ -75,22 +85,27 @@ export default function OffersCarouselClient({ products }: { products: Product[]
         style={{ scrollSnapType: "x mandatory" }}
       >
         {items.map((p) => {
-          const fav = isFavorite(p.id);
+          const product = p as ProductWithSlug;
+          const fav = isFavorite(String(product.id));
+          const active = isDiscountActive(product);
+          const price = Number(product.price_estimated ?? 0);
+          const discount = Number(product.discount_percent ?? 0);
+          const finalPrice = active ? +(price * (1 - discount / 100)).toFixed(2) : price;
 
-          // Link “inteligente” por si existe tu ruta por categoría
+          // Link "inteligente" por si existe tu ruta por categoría
           const href =
-            p.category_slug ? `/productos?cat=${encodeURIComponent(p.category_slug)}` : "/productos";
+            product.category_slug ? `/productos?cat=${encodeURIComponent(product.category_slug)}` : "/productos";
 
           return (
             <div
-              key={p.id}
+              key={product.id}
               className="min-w-[260px] max-w-[260px] bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden"
               style={{ scrollSnapAlign: "start" }}
             >
               <div className="relative h-40 bg-gray-200">
                 <Image
-                  src={p.image_url || "/placeholder.png"}
-                  alt={p.name}
+                  src={product.image_url || "/placeholder.png"}
+                  alt={product.name}
                   fill
                   className="object-cover"
                   sizes="260px"
@@ -101,10 +116,10 @@ export default function OffersCarouselClient({ products }: { products: Product[]
                   type="button"
                   onClick={() => {
                     toggle({
-                      id: p.id,
-                      name: p.name,
-                      price_estimated: p.price_estimated,
-                      image_url: p.image_url || "/placeholder.png",
+                      id: String(product.id),
+                      name: product.name,
+                      price_estimated: product.price_estimated,
+                      image_url: product.image_url || "/placeholder.png",
                     });
                     toast(fav ? "Eliminado de favoritos" : "Agregado a favoritos", "success");
                   }}
@@ -129,14 +144,26 @@ export default function OffersCarouselClient({ products }: { products: Product[]
               </div>
 
               <div className="p-4">
-                <h3 className="font-semibold text-lg leading-tight mb-2 line-clamp-2">{p.name}</h3>
-                <p className="text-green-600 font-extrabold mb-3">{formatPLN(p.price_estimated)}</p>
+                <h3 className="font-semibold text-lg leading-tight mb-2 line-clamp-2">{product.name}</h3>
+
+                {/* Precio con descuento activo */}
+                {active ? (
+                  <div className="flex items-baseline gap-2 mb-3">
+                    <span className="text-lg font-bold text-green-600">{formatPLN(Number(finalPrice))}</span>
+                    <span className="text-sm line-through opacity-60">{formatPLN(price)}</span>
+                    <span className="text-xs font-semibold px-2 py-1 rounded bg-red-600 text-white">
+                      -{discount}%
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-green-600 font-extrabold mb-3">{formatPLN(price)}</p>
+                )}
 
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => {
-                      addItem(p as any);
+                      addItem(product);
                       toast("Se ha agregado al carrito", "success");
                     }}
                     className="flex-1 bg-[#FF3131] text-[#FC145] py-2 rounded-xl hover:bg-[#e62b2b] hover:text-[#f5b800] focus:outline-none focus:ring-2 focus:ring-[#FF3131]/40 font-semibold"
@@ -159,3 +186,4 @@ export default function OffersCarouselClient({ products }: { products: Product[]
     </section>
   );
 }
+

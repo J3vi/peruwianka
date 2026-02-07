@@ -12,6 +12,17 @@ function slugify(s: string) {
     .replace(/^-+|-+$/g, "");
 }
 
+/**
+ * Verifica si un descuento está vencido (pero aún tiene discount_percent > 0)
+ */
+function isDiscountExpired(discount_percent: number | null, discount_until: string | null): boolean {
+  const discount = Number(discount_percent ?? 0);
+  if (discount <= 0) return false;
+  if (!discount_until) return false;
+  const until = new Date(discount_until).getTime();
+  return until <= Date.now();
+}
+
 export default async function NuevoProductoPage({
   searchParams,
 }: {
@@ -38,6 +49,7 @@ export default async function NuevoProductoPage({
     const price = Number(formData.get("price") ?? 0);
     const weight = Number(formData.get("weight") ?? 0);
     const discount_percent = Number(formData.get("discount_percent") ?? 0);
+    const discount_until_raw = formData.get("discount_until");
     const category_id_raw = formData.get("category_id");
     const brand_id_raw = formData.get("brand_id");
     const image_url = String(formData.get("image_url") ?? "").trim();
@@ -120,6 +132,12 @@ export default async function NuevoProductoPage({
       slug = slugify(name);
     }
 
+    // Procesar discount_until
+    const discount_until =
+      discount_until_raw && String(discount_until_raw).trim() !== ""
+        ? new Date(String(discount_until_raw)).toISOString()
+        : null;
+
     // Enviar al API
     const res = await fetch(`${origin}/api/admin/productos`, {
       method: "POST",
@@ -134,6 +152,7 @@ export default async function NuevoProductoPage({
         price,
         weight,
         discount_percent: discount,
+        discount_until,
         category_id,
         brand_id,
         image_url: finalImageUrl,
@@ -281,6 +300,20 @@ export default async function NuevoProductoPage({
           </label>
         </div>
 
+        <div style={{ display: "grid", gap: 6 }}>
+          <span>Descuento hasta (fecha)</span>
+          <input
+            name="discount_until"
+            type="datetime-local"
+            style={{
+              height: 44,
+              padding: "0 12px",
+              border: "1px solid #ddd",
+              borderRadius: 12,
+            }}
+          />
+        </div>
+
         <div
           style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
         >
@@ -370,6 +403,45 @@ export default async function NuevoProductoPage({
           Crear producto
         </button>
       </form>
+
+      {/* Client-side validation for discount expiration */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              const form = document.querySelector('form');
+              const discountPercentInput = document.querySelector('input[name="discount_percent"]');
+              const discountUntilInput = document.querySelector('input[name="discount_until"]');
+              
+              function checkDiscountExpiration() {
+                const discount = parseFloat(discountPercentInput?.value) || 0;
+                const untilValue = discountUntilInput?.value;
+                
+                // Remove existing warning
+                const existingWarning = document.getElementById('discount-expired-warning');
+                if (existingWarning) existingWarning.remove();
+                
+                if (discount > 0 && untilValue) {
+                  const untilDate = new Date(untilValue);
+                  if (untilDate.getTime() <= Date.now()) {
+                    // Show warning
+                    const warning = document.createElement('div');
+                    warning.id = 'discount-expired-warning';
+                    warning.style.cssText = 'margin-top: 8px; padding: 8px 12px; background: #ff4d4f; color: white; border-radius: 4px; font-size: 13px; font-weight: 600;';
+                    warning.textContent = '⚠️ Fecha vencida - El descuento ya no estará activo';
+                    discountUntilInput?.parentElement?.appendChild(warning);
+                  }
+                }
+              }
+              
+              if (form && discountPercentInput && discountUntilInput) {
+                discountPercentInput.addEventListener('input', checkDiscountExpiration);
+                discountUntilInput.addEventListener('input', checkDiscountExpiration);
+              }
+            })();
+          `,
+        }}
+      />
     </div>
   );
 }

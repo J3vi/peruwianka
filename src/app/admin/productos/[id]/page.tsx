@@ -4,8 +4,20 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { cookies, headers } from "next/headers";
 import ScrollToFlash from "./ScrollToFlash";
+import { ClearDiscountButton } from "./ClearDiscountButton";
 
 type PageProps = { params: { id: string }; searchParams?: { error?: string; success?: string } };
+
+/**
+ * Verifica si un descuento está vencido (pero aún tiene discount_percent > 0)
+ */
+function isDiscountExpired(discount_percent: number | null, discount_until: string | null): boolean {
+  const discount = Number(discount_percent ?? 0);
+  if (discount <= 0) return false;
+  if (!discount_until) return false;
+  const until = new Date(discount_until).getTime();
+  return until <= Date.now();
+}
 
 export default async function AdminProductoEditPage({ params, searchParams }: PageProps) {
   const supabase = await createClient();
@@ -64,6 +76,10 @@ export default async function AdminProductoEditPage({ params, searchParams }: Pa
     const price_estimated = Number(formData.get("price_estimated") ?? 0);
     const weight = Number(formData.get("weight") ?? 0);
     const discount_percent = Number(formData.get("discount_percent") ?? 0);
+    const discount_until_raw = formData.get("discount_until");
+    const discount_until = discount_until_raw && String(discount_until_raw).trim() !== "" 
+      ? new Date(String(discount_until_raw)).toISOString() 
+      : null;
 
     const is_active = formData.get("is_active") === "on";
 
@@ -129,6 +145,7 @@ export default async function AdminProductoEditPage({ params, searchParams }: Pa
       price_estimated: Number.isFinite(price_estimated) ? price_estimated : 0,
       weight: Number.isFinite(weight) ? Math.trunc(weight) : 0,
       discount_percent: Number.isFinite(discount_percent) ? Math.trunc(discount_percent) : 0,
+      discount_until,
       is_active,
       category_id,
       brand_id,
@@ -237,6 +254,31 @@ export default async function AdminProductoEditPage({ params, searchParams }: Pa
               style={{ padding: 10, borderRadius: 10, border: "1px solid #333", background: "transparent" }}
             />
           </label>
+        </div>
+
+        <div style={{ display: "grid", gap: 6 }}>
+          <span>Descuento hasta (fecha)</span>
+          <input
+            name="discount_until"
+            type="datetime-local"
+            defaultValue={product.discount_until ? product.discount_until.slice(0, 16) : ""}
+            style={{ padding: 10, borderRadius: 10, border: "1px solid #333", background: "transparent" }}
+          />
+          {isDiscountExpired(product.discount_percent, product.discount_until) && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+              <span style={{ 
+                background: "#ff4d4f", 
+                color: "white", 
+                padding: "4px 8px", 
+                borderRadius: 4, 
+                fontSize: 12,
+                fontWeight: 600 
+              }}>
+                Descuento vencido
+              </span>
+              <ClearDiscountButton productId={product.id} productName={product.name} />
+            </div>
+          )}
         </div>
 
         <label style={{ display: "grid", gap: 6 }}>

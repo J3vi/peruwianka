@@ -113,16 +113,30 @@ export default function CheckoutPage() {
                   <span>{formatPLN(item.price_estimated * item.qty)}</span>
                 </div>
               ))}
-              <div className="border-t pt-2 font-bold">
-                <div className="flex justify-between">
-                  <span>Total:</span>
-                  <span>{formatPLN(getTotal())}</span>
-                </div>
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>Envío:</span>
-                  <span>{getTotal() >= 220 ? 'Gratis' : formatPLN(20)}</span>
-                </div>
-              </div>
+              {(() => {
+                const subtotal = getTotal(); // suma de productos
+                const shippingCost = subtotal >= 199 ? 0 : 20; // envío real
+                const totalFinal = subtotal + shippingCost;
+
+                return (
+                  <div className="border-t pt-2">
+                    <div className="flex justify-between font-bold">
+                      <span>Subtotal:</span>
+                      <span>{formatPLN(subtotal)}</span>
+                    </div>
+
+                    <div className="flex justify-between text-sm text-gray-600">
+                      <span>Envío:</span>
+                      <span>{shippingCost === 0 ? "Gratis" : formatPLN(shippingCost)}</span>
+                    </div>
+
+                    <div className="flex justify-between font-bold mt-2">
+                      <span>Total:</span>
+                      <span>{formatPLN(totalFinal)}</span>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
 

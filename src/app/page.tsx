@@ -9,15 +9,70 @@ export const revalidate = 0;
 
 export default async function Page() {
   const supabase = await createClient();
+  const nowIso = new Date().toISOString();
 
-  const { data: products, error } = await supabase
+  // 1) Ofertas: productos con discount_percent > 0 Y descuento activo
+  // Regla: discount_percent > 0 AND (discount_until IS NULL OR discount_until > NOW())
+  const { data: offersNull, error: offersErrorNull } = await supabase
+    .from("products")
+    .select("*")
+    .gt("discount_percent", 0)
+    .is("discount_until", null)
+    .order("created_at", { ascending: false });
+
+  const { data: offersFuture, error: offersErrorFuture } = await supabase
+    .from("products")
+    .select("*")
+    .gt("discount_percent", 0)
+    .gt("discount_until", nowIso)
+    .order("created_at", { ascending: false });
+
+  // Combinar y dedupe
+  const offersMap = new Map<number, Product>();
+  (offersNull ?? []).forEach((p: any) => {
+    if (p?.id) offersMap.set(p.id, p as Product);
+  });
+  (offersFuture ?? []).forEach((p: any) => {
+    if (p?.id) offersMap.set(p.id, p as Product);
+  });
+
+  const offers = Array.from(offersMap.values()).slice(0, 12);
+  const offersError = offersErrorNull || offersErrorFuture;
+
+  // 2) Novedades: últimos productos
+  const { data: newest, error: newestError } = await supabase
     .from("products")
     .select("*")
     .order("created_at", { ascending: false })
     .limit(12);
 
-  // Si falla la query, no rompas el home: muestra vacío
-  const safeProducts: Product[] = (products as Product[]) ?? [];
+  // 3) Merge: ofertas primero, completar con novedades sin duplicados
+  const offersSafe: Product[] = (offers as Product[]) ?? [];
+  const newestSafe: Product[] = (newest as Product[]) ?? [];
+
+  const seen = new Set<string | number>();
+  const merged: Product[] = [];
+
+  for (const p of offersSafe) {
+    if (!p?.id) continue;
+    if (seen.has(p.id)) continue;
+    seen.add(p.id);
+    merged.push(p);
+    if (merged.length >= 12) break;
+  }
+
+  if (merged.length < 12) {
+    for (const p of newestSafe) {
+      if (!p?.id) continue;
+      if (seen.has(p.id)) continue;
+      seen.add(p.id);
+      merged.push(p);
+      if (merged.length >= 12) break;
+    }
+  }
+
+  // Manejo de errores unificado
+  const error = offersError || newestError;
 
   return (
     <main>
@@ -45,7 +100,7 @@ export default async function Page() {
           </p>
         ) : (
           <div className="mt-6 px-4">
-            <ProductGridClient products={safeProducts} />
+            <ProductGridClient products={merged} />
           </div>
         )}
       </section>

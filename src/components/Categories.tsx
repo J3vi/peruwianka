@@ -8,12 +8,12 @@ type Category = {
 };
 
 const CATEGORIES: Category[] = [
-  { slug: "sazonadores", name: "Condimentos y Especies", icon: "🍲" },
+  { slug: "condimentos-y-especias", name: "Condimentos y Especias", icon: "🍲" },
   { slug: "bebidas", name: "Bebidas", icon: "🥤" },
   { slug: "granos", name: "Granos", icon: "🌽" },
   { slug: "snacks", name: "Snacks", icon: "🍿" },
   { slug: "pastas-y-salsas", name: "Pastas y Salsas", icon: "🌶️" },
-  { slug: "marcas", name: "Marcas", icon: "🏷️" },
+  { slug: "pack", name: "Pack", icon: "📦" },
 ];
 
 export default function Categories() {

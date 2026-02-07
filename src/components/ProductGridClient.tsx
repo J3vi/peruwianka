@@ -12,6 +12,18 @@ interface ProductGridClientProps {
   products: Product[];
 }
 
+/**
+ * Verifica si un descuento está activo según la regla:
+ * discount_percent > 0 AND (discount_until IS NULL OR discount_until > NOW())
+ */
+function isDiscountActive(product: Product): boolean {
+  const discount = Number(product.discount_percent ?? 0);
+  if (discount <= 0) return false;
+  if (!product.discount_until) return true;
+  const until = new Date(product.discount_until).getTime();
+  return until > Date.now();
+}
+
 function toast(message: string, type: 'success' | 'error' | 'info' = 'success') {
   window.dispatchEvent(
     new CustomEvent('peruwianka:toast', { detail: { message, type } })
@@ -81,9 +93,10 @@ export default function ProductGridClient({ products }: ProductGridClientProps) 
               {(() => {
                 const price = Number(product.price_estimated ?? 0);
                 const discount = Number(product.discount_percent ?? 0);
-                const finalPrice = discount > 0 ? +(price * (1 - discount / 100)).toFixed(2) : price;
+                const active = isDiscountActive(product);
+                const finalPrice = active ? +(price * (1 - discount / 100)).toFixed(2) : price;
 
-                return discount > 0 ? (
+                return active ? (
                   <div className="flex items-baseline gap-2">
                     <span className="text-lg font-semibold text-green-600">{formatPLN(finalPrice)}</span>
                     <span className="text-sm line-through opacity-60">{formatPLN(price)}</span>

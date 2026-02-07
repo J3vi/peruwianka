@@ -93,6 +93,20 @@ export async function POST(request: Request) {
     discount_percent = 0;
   }
 
+  // Validar discount_until
+  let discount_until_raw = body.discount_until;
+  let discount_until: string | null = null;
+  
+  if (discount_percent > 0 && discount_until_raw) {
+    // Si hay descuento > 0 y viene discount_until, convertir a ISO
+    const parsed = new Date(String(discount_until_raw));
+    if (!isNaN(parsed.getTime())) {
+      discount_until = parsed.toISOString();
+    }
+    // Si viene vacío como string, permitir null (descuento sin fecha)
+  }
+  // Si discount_percent = 0, forzar discount_until = null (independientemente de lo que venga)
+
   // Generar slug si no viene
   let slug = String(body.slug || "").trim();
   if (!slug && name) {
@@ -115,6 +129,7 @@ export async function POST(request: Request) {
     price_estimated,
     weight: Math.trunc(weight),
     discount_percent: Math.trunc(discount_percent),
+    discount_until,
     is_active: typeof body.is_active === "boolean" ? body.is_active : true,
     category_id,
     brand_id,
@@ -124,7 +139,7 @@ export async function POST(request: Request) {
   const { data, error } = await supabaseAdmin
     .from("products")
     .insert(payload)
-    .select("id,name,slug,description,price_estimated,weight,image_url,category_id,brand_id,is_active,discount_percent,created_at")
+    .select("id,name,slug,description,price_estimated,weight,image_url,category_id,brand_id,is_active,discount_percent,discount_until,created_at")
     .single();
 
   if (error) {
