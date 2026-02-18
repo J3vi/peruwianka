@@ -25,7 +25,9 @@ export interface Product {
   brand_id: number
   is_active: boolean
   has_variants: boolean
+  stock_qty?: number
   created_at: string
+
   discount_percent: number | null
   discount_until?: string | null
   updated_at?: string

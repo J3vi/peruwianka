@@ -35,8 +35,9 @@ export async function GET() {
   // OJO: el alias "category:categories(name)" hace que te llegue { category: { name } }
   const { data: products, error } = await supabase
     .from("products")
-    .select("id,name,price_estimated,discount_percent,is_active,category_id,category:categories(name)")
+    .select("id,name,stock_qty,price_estimated,discount_percent,is_active,category_id,category:categories(name)")
     .order("id", { ascending: true });
+
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -71,25 +71,44 @@ export default function AdminPage() {
         </button>
       </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-        <Link href="/admin/productos" className="rounded-2xl border bg-white p-6 shadow-sm hover:shadow">
+      <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
+
+        <Link href="/admin/productos" className="block rounded-2xl border bg-white p-6 shadow-sm hover:shadow">
           <div className="text-2xl">📦</div>
-          <div className="mt-3 text-xl font-semibold">Configuración</div>
-          <div className="text-gray-600">Crear / editar / desactivar</div>
+          <h3 className="mt-3 text-xl font-semibold">Configuración</h3>
+          <p className="text-gray-600">Crear / editar / desactivar</p>
         </Link>
 
-        <Link href="/admin/descuentos" className="rounded-2xl border bg-white p-6 shadow-sm hover:shadow">
+        <Link href="/admin/restock" className="block rounded-2xl border bg-white p-6 shadow-sm hover:shadow">
+          <div className="text-2xl">🛒</div>
+          <h3 className="mt-3 text-xl font-semibold">Hacer pedido</h3>
+          <p className="text-gray-600">Gestionar stock y generar recibos</p>
+        </Link>
+
+        <Link href="/admin/estadisticas" className="block rounded-2xl border bg-white p-6 shadow-sm hover:shadow">
+
           <div className="text-2xl">🏷️</div>
-          <div className="mt-3 text-xl font-semibold">Descuentos</div>
-          <div className="text-gray-600">Crear / editar / desactivar</div>
+          <h3 className="mt-3 text-xl font-semibold">Estadísticas</h3>
+          <p className="text-gray-600">Más vendidos, populares y sin movimiento</p>
         </Link>
 
-        <Link href="/admin/banners" className="rounded-2xl border bg-white p-6 shadow-sm hover:shadow">
+
+
+        <Link href="/admin/banners" className="block rounded-2xl border bg-white p-6 shadow-sm hover:shadow">
           <div className="text-2xl">🖼️</div>
-          <div className="mt-3 text-xl font-semibold">Banners</div>
-          <div className="text-gray-600">Crear / editar / desactivar</div>
+          <h3 className="mt-3 text-xl font-semibold">Banners</h3>
+          <p className="text-gray-600">Crear / editar / desactivar</p>
         </Link>
+
+
+        <Link href="/admin/ordenes" className="block rounded-2xl border bg-white p-6 shadow-sm hover:shadow">
+          <div className="text-2xl">📋</div>
+          <h3 className="mt-3 text-xl font-semibold">Órdenes</h3>
+          <p className="text-gray-600">Ver pedidos, estado y detalle por cliente</p>
+        </Link>
+
       </div>
+
     </main>
   );
 }

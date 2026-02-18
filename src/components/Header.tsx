@@ -38,7 +38,11 @@ export default function Header() {
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+
+  const aliveRef = useRef(true);
+
+
 
   const supabase = useMemo(() => createSupabaseClient(), []);
 
@@ -160,45 +164,70 @@ export default function Header() {
     setHighlightedIndex(-1);
   }, [pathname]);
 
-  useEffect(() => {
-    let alive = true;
-
-    const fetchMe = async () => {
-      try {
-        const res = await fetch("/api/me", { cache: "no-store" });
-        if (!res.ok) {
-          if (alive) setIsAdmin(false);
-          return;
+  const loadMe = useCallback(async () => {
+    try {
+      const res = await fetch("/api/me", { cache: "no-store" });
+      if (!res.ok) {
+        if (aliveRef.current) {
+          setIsAdmin(false);
+          sessionStorage.setItem("header:isAdmin", "false");
         }
-        const json = await res.json();
-        if (alive) setIsAdmin(!!json.isAdmin);
-      } catch {
-        if (alive) setIsAdmin(false);
+        return;
       }
+      const data = await res.json();
+      const isAdminValue = !!data?.isAdmin;
+      if (aliveRef.current) {
+        setIsAdmin(isAdminValue);
+        sessionStorage.setItem("header:isAdmin", String(isAdminValue));
+      }
+    } catch (e) {
+      console.error("Header: /api/me failed", e);
+      if (aliveRef.current) {
+        setIsAdmin(false);
+        sessionStorage.setItem("header:isAdmin", "false");
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    aliveRef.current = true;
+    // Leer de sessionStorage solo en cliente (después del mount)
+    if (typeof window !== "undefined") {
+      const cached = sessionStorage.getItem("header:isAdmin");
+      if (cached !== null) {
+        setIsAdmin(cached === "true");
+      }
+    }
+    loadMe();
+    return () => {
+      aliveRef.current = false;
     };
+  }, [loadMe, pathname]);
 
-    // 1) carga inicial
-    fetchMe();
 
-    // 2) refresca cuando hay login/logout
+  // Refresca cuando hay login/logout
+  useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange(() => {
-      fetchMe();
+      aliveRef.current = true;
+      loadMe();
     });
 
     return () => {
-      alive = false;
       sub.subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, [supabase, loadMe]);
+
+
 
   function onSubmitSearch(e: FormEvent) {
     e.preventDefault();
     const q = search.trim();
     if (!q) return;
     router.push(`/productos?q=${encodeURIComponent(q)}`);
-
-    setIsAdmin(false);
+    setOpen(false);
+    setHighlightedIndex(-1);
   }
+
 
   async function onLogout() {
     await supabase.auth.signOut();
@@ -293,21 +322,22 @@ export default function Header() {
                   {!loading && suggestions.length > 0 && (
                     <div className="border-b">
                       {suggestions.map((s, idx) => (
-                        <button
+                      <button
                           key={s}
                           type="button"
                           className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${
                             highlightedIndex === idx ? "bg-gray-50" : ""
                           }`}
                           onClick={() => {
-                            router.push(`/productos?q=${encodeURIComponent(s)}`);
+                            setSearch(s);
                             setOpen(false);
-
                             setHighlightedIndex(-1);
+                            inputRef.current?.focus();
                           }}
                         >
                           {s}
                         </button>
+
                       ))}
                     </div>
                   )}
@@ -324,14 +354,15 @@ export default function Header() {
                               highlightedIndex === hi ? "bg-gray-50" : ""
                             }`}
                             onClick={() => {
-                              router.push(`/productos?q=${encodeURIComponent(p.name)}`);
+                              setSearch(p.name);
                               setOpen(false);
-
                               setHighlightedIndex(-1);
+                              inputRef.current?.focus();
                             }}
                           >
                             {p.name}
                           </button>
+
                         );
                       })}
                     </div>
@@ -370,11 +401,12 @@ export default function Header() {
               <span className="hidden sm:inline">Favoritos</span>
             </Link>
 
-            {isAdmin && (
+            {isAdmin === true && (
               <Link href="/admin" className="font-semibold text-gray-700 hover:text-green-600">
                 Admin
               </Link>
             )}
+
 
             <CartDropdown disableAutoOpen={disableMiniCartAutoOpen} />
           </div>

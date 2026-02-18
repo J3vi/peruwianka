@@ -31,11 +31,13 @@ CREATE TABLE products (
   brand_id INTEGER REFERENCES brands(id),
   is_active BOOLEAN DEFAULT TRUE,
   has_variants BOOLEAN DEFAULT FALSE,
+  stock_qty INTEGER DEFAULT 0,
   discount_percent NUMERIC(5,2) DEFAULT 0,
   discount_until TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
 
 -- Product variants table
 CREATE TABLE product_variants (
