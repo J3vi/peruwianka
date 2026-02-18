@@ -30,11 +30,49 @@ CREATE TABLE products (
   category_id INTEGER REFERENCES categories(id),
   brand_id INTEGER REFERENCES brands(id),
   is_active BOOLEAN DEFAULT TRUE,
+  has_variants BOOLEAN DEFAULT FALSE,
   discount_percent NUMERIC(5,2) DEFAULT 0,
   discount_until TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Product variants table
+CREATE TABLE product_variants (
+  id SERIAL PRIMARY KEY,
+  product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  label TEXT NOT NULL,
+  amount NUMERIC(10,2) NOT NULL,
+  unit TEXT NOT NULL,
+  price NUMERIC(10,2) NOT NULL,
+  is_default BOOLEAN DEFAULT FALSE,
+  sort_order INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Indexes for product_variants
+CREATE INDEX idx_product_variants_product_id ON product_variants(product_id);
+CREATE UNIQUE INDEX idx_product_variants_one_default_per_product ON product_variants(product_id) WHERE is_default = TRUE;
+CREATE INDEX idx_product_variants_sort_order ON product_variants(product_id, sort_order);
+CREATE INDEX idx_product_variants_active ON product_variants(product_id, is_active) WHERE is_active = TRUE;
+
+-- Trigger function for updated_at
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger for product_variants
+CREATE TRIGGER update_product_variants_updated_at
+  BEFORE UPDATE ON product_variants
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
 
 -- Profiles table
 CREATE TABLE profiles (
@@ -63,8 +101,10 @@ CREATE TABLE orders (
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE brands ENABLE ROW LEVEL SECURITY;
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE product_variants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+
 
 -- Policies for categories
 CREATE POLICY "Categories are viewable by everyone" ON categories FOR SELECT USING (true);
@@ -101,6 +141,19 @@ CREATE POLICY "Products are updatable by admins only" ON products FOR UPDATE USI
 CREATE POLICY "Products are deletable by admins only" ON products FOR DELETE USING (
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'ADMIN')
 );
+
+-- Policies for product_variants
+CREATE POLICY "Product variants are viewable by everyone" ON product_variants FOR SELECT USING (is_active = TRUE);
+CREATE POLICY "Product variants are insertable by admins only" ON product_variants FOR INSERT WITH CHECK (
+  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'ADMIN')
+);
+CREATE POLICY "Product variants are updatable by admins only" ON product_variants FOR UPDATE USING (
+  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'ADMIN')
+);
+CREATE POLICY "Product variants are deletable by admins only" ON product_variants FOR DELETE USING (
+  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'ADMIN')
+);
+
 
 -- Policies for profiles
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);

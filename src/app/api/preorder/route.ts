@@ -43,48 +43,24 @@ export async function POST(request: Request) {
       if (!error) userId = data.user?.id ?? null;
     }
 
-    // Fetch product prices
-    const productIds = items.map((item: any) => item.productId).filter(Boolean);
-
-    const { data: products, error: productsError } = await supabaseAdmin
-      .from("products")
-      .select("id, name, price_estimated")
-      .in("id", productIds);
-    
-    if (productsError) {
-      console.error("🔥 products fetch error", {
-        message: productsError.message,
-        details: (productsError as any).details,
-        hint: (productsError as any).hint,
-        code: (productsError as any).code,
-        productIds,
-        url,
-      });
-    
-      return NextResponse.json({ error: "Failed to fetch product prices" }, { status: 500 });
-    }
-    
-    if (!products) {
-      console.error("🔥 products fetch returned null", { productIds, url });
-      return NextResponse.json({ error: "Failed to fetch product prices" }, { status: 500 });
-    }
-    
-
-    // Calculate totals
-    let totalEstimated = 0
+    // Calculate totals using unit_price from cart (already correct for variants)
+    let totalEstimated = 0;
     const orderItems = items.map((item: any) => {
-      const product = products.find((p: any) => p.id === item.productId)
-      if (!product) throw new Error(`Product ${item.productId} not found`)
-      const subtotal = product.price_estimated * item.qty
-      totalEstimated += subtotal
+      // Use unit_price from cart (already has correct variant price)
+      const unitPrice = item.unit_price ?? 0;
+      const lineTotal = item.line_total ?? (unitPrice * item.qty);
+      totalEstimated += lineTotal;
+      
       return {
         productId: item.productId,
-        name: product.name,
+        variant_id: item.variant_id,
+        variant_label: item.variant_label,
+        name: item.name || `Producto ${item.productId}`,
         qty: item.qty,
-        price_estimated: product.price_estimated,
-        subtotal
-      }
-    })
+        unit_price: unitPrice,
+        line_total: lineTotal
+      };
+    });
 
     const FREE_SHIPPING_THRESHOLD = 199;
     const shippingCost = totalEstimated >= FREE_SHIPPING_THRESHOLD ? 0 : 20

@@ -38,16 +38,20 @@ export async function GET(request: Request) {
     // Determinar ordenamiento
     const { col, asc } = sortMap[sort] ?? sortMap.newest;
 
-    // Construir query base con LEFT JOIN para categories
+    // Construir query base con LEFT JOIN para categories y product_variants
     let q = supabase
       .from("products")
       .select(
-        "id,name,price_estimated,discount_percent,discount_until,weight,image_url,is_active,category_id,categories(name,slug),brand:brands(name,slug)",
+        "id,slug,name,price_estimated,discount_percent,discount_until,weight,image_url,is_active,has_variants,category_id,categories(name,slug),brand:brands(name,slug),product_variants(id,label,amount,unit,price,is_default,sort_order,is_active)",
         { count: "exact" }
       )
+
       .eq("is_active", true)
       .range(from, to)
-      .order(col, { ascending: asc });
+      .order(col, { ascending: asc })
+      .order("sort_order", { referencedTable: "product_variants", ascending: true })
+      .order("id", { referencedTable: "product_variants", ascending: true });
+
 
     // Filtro de ofertas activas
     if (offersOnly) {

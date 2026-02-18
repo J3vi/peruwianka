@@ -24,13 +24,35 @@ export interface Product {
   category_id: number
   brand_id: number
   is_active: boolean
+  has_variants: boolean
   created_at: string
   discount_percent: number | null
   discount_until?: string | null
   updated_at?: string
   category?: Category
   brand?: Brand
+  product_variants?: ProductVariant[]
+  // Campos opcionales para items en carrito con variantes
+  variant_id?: number
+  variant_label?: string
+
 }
+
+
+export interface ProductVariant {
+  id: number
+  product_id: number
+  label: string
+  amount: number
+  unit: string
+  price: number
+  is_default: boolean
+  sort_order: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
 
 export interface Order {
   id: string

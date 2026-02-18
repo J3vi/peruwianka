@@ -122,6 +122,9 @@ export async function POST(request: Request) {
   // 4) Insert con service role (evita RLS)
   const supabaseAdmin = createServiceClient();
 
+  const has_variants = Boolean(body.has_variants);
+  const variants = Array.isArray(body.variants) ? body.variants : [];
+
   const payload = {
     name,
     slug,
@@ -131,6 +134,7 @@ export async function POST(request: Request) {
     discount_percent: Math.trunc(discount_percent),
     discount_until,
     is_active: typeof body.is_active === "boolean" ? body.is_active : true,
+    has_variants,
     category_id,
     brand_id,
     image_url,
@@ -139,11 +143,57 @@ export async function POST(request: Request) {
   const { data, error } = await supabaseAdmin
     .from("products")
     .insert(payload)
-    .select("id,name,slug,description,price_estimated,weight,image_url,category_id,brand_id,is_active,discount_percent,discount_until,created_at")
+    .select("id,name,slug,description,price_estimated,weight,image_url,category_id,brand_id,is_active,has_variants,discount_percent,discount_until,created_at")
     .single();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  // If has_variants is true and variants exist, insert them
+  if (has_variants && variants.length > 0 && data?.id) {
+    const productId = data.id;
+    
+    // Prepare variants for insertion (remove id if present, add product_id)
+    const variantsToInsert = variants.map((v: any, index: number) => ({
+      product_id: productId,
+      label: String(v.label || "").trim(),
+      amount: Number(v.amount) || 0,
+      unit: String(v.unit || "g"),
+      price: Number(v.price) || 0,
+      is_default: index === 0, // First variant is default if none specified
+      sort_order: Number(v.sort_order) || index,
+      is_active: v.is_active !== false, // Default to true unless explicitly false
+    }));
+
+    // If any variant has is_default explicitly set, use that instead
+    const hasExplicitDefault = variants.some((v: any) => v.is_default === true);
+    if (hasExplicitDefault) {
+      variantsToInsert.forEach((v: any, i: number) => {
+        v.is_default = variants[i].is_default === true;
+      });
+    }
+
+    // Ensure at least one variant is default
+    const hasDefault = variantsToInsert.some((v: any) => v.is_default);
+    if (!hasDefault && variantsToInsert.length > 0) {
+      // Find first active variant to be default
+      const firstActiveIndex = variantsToInsert.findIndex((v: any) => v.is_active);
+      if (firstActiveIndex >= 0) {
+        variantsToInsert[firstActiveIndex].is_default = true;
+      } else {
+        variantsToInsert[0].is_default = true;
+      }
+    }
+
+    const { error: variantsError } = await supabaseAdmin
+      .from("product_variants")
+      .insert(variantsToInsert);
+
+    if (variantsError) {
+      console.error("Error creating variants:", variantsError);
+      // Don't fail the whole request, but log the error
+    }
   }
 
   return NextResponse.json({ data }, { status: 200 });
