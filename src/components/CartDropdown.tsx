@@ -89,7 +89,7 @@ export default function CartDropdown({ disableAutoOpen }: { disableAutoOpen: boo
             <>
               <div className="space-y-3">
                 {cart.slice(0, 4).map(item => (
-                  <div key={item.productId} className="flex gap-3">
+                  <div key={item.cartKey} className="flex gap-3">
                     <Image
                       src={item.image_url || '/placeholder.png'}
                       alt={item.name}
@@ -98,9 +98,12 @@ export default function CartDropdown({ disableAutoOpen }: { disableAutoOpen: boo
                       className="h-12 w-12 rounded-md object-cover border"
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold">{item.name}</p>
+                      <p className="truncate text-sm font-semibold">
+                        {item.name}
+                        {item.variant_label && <span className="text-gray-500"> — {item.variant_label}</span>}
+                      </p>
                       <p className="text-sm text-gray-600">
-                        {item.qty} × {formatPLN(item.price_estimated)}
+                        {item.qty} × {formatPLN(item.unit_price)}
                       </p>
                     </div>
                   </div>

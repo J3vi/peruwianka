@@ -48,7 +48,12 @@ async function getProducts(searchParams: { [key: string]: string | string[] | un
     const sort = typeof searchParams.sort === 'string' ? searchParams.sort : 'newest';
     const offers = searchParams.offers;
     const categoria = typeof searchParams.categoria === 'string' ? searchParams.categoria : undefined;
-    const query = typeof searchParams.q === 'string' ? searchParams.q : undefined;
+    const q =
+      (searchParams?.q as string) ??
+      (searchParams?.query as string) ??
+      "";
+    const query = q.trim() || undefined;
+
     const page = typeof searchParams.page === 'string' ? parseInt(searchParams.page, 10) : 1;
 
     // Agregar todos los parámetros relevantes
@@ -90,7 +95,12 @@ async function getProducts(searchParams: { [key: string]: string | string[] | un
 export default async function ProductosPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const params = await searchParams;
   const categoria = typeof params.categoria === 'string' ? params.categoria : undefined;
-  const query = typeof params.q === 'string' ? params.q : undefined;
+  const q =
+    (params?.q as string) ??
+    (params?.query as string) ??
+    "";
+  const query = q.trim() || undefined;
+
 
   console.log("=== DEBUG PAGE ===");
   console.log("params:", JSON.stringify(params));
@@ -138,4 +148,3 @@ export default async function ProductosPage({ searchParams }: { searchParams: Pr
     </main>
   );
 }
-

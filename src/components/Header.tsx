@@ -122,11 +122,13 @@ export default function Header() {
       if (highlightedIndex >= 0) {
         if (highlightedIndex < suggestions.length) {
           const sugg = suggestions[highlightedIndex];
-          router.push(`/productos?query=${encodeURIComponent(sugg)}`);
+          router.push(`/productos?q=${encodeURIComponent(sugg)}`);
+
         } else {
           const prodIndex = highlightedIndex - suggestions.length;
           const prod = products[prodIndex];
-          router.push(`/productos?query=${encodeURIComponent(prod.name)}`);
+          router.push(`/productos?q=${encodeURIComponent(prod.name)}`);
+
         }
         setOpen(false);
         setHighlightedIndex(-1);
@@ -193,7 +195,8 @@ export default function Header() {
     e.preventDefault();
     const q = search.trim();
     if (!q) return;
-    router.push(`/productos?query=${encodeURIComponent(q)}`);
+    router.push(`/productos?q=${encodeURIComponent(q)}`);
+
     setIsAdmin(false);
   }
 
@@ -240,8 +243,9 @@ export default function Header() {
 
           {/* Search */}
           <div className="w-full sm:flex-1 sm:max-w-xl sm:mx-4 min-w-0">
-            <form onSubmit={onSubmitSearch} className="w-full max-w-xl">
+          <form onSubmit={onSubmitSearch} className="relative w-full max-w-xl">
               <div className="flex w-full">
+
                 <input
                   ref={inputRef}
                   value={search}
@@ -277,8 +281,9 @@ export default function Header() {
               {open && (
                 <div
                   ref={dropdownRef}
-                  className="mt-2 rounded-lg border bg-white shadow-sm overflow-hidden"
+                  className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden"
                 >
+
                   {loading && <div className="p-3 text-sm text-gray-500">Buscando…</div>}
 
                   {!loading && suggestions.length === 0 && products.length === 0 && (
@@ -295,8 +300,9 @@ export default function Header() {
                             highlightedIndex === idx ? "bg-gray-50" : ""
                           }`}
                           onClick={() => {
-                            router.push(`/productos?query=${encodeURIComponent(s)}`);
+                            router.push(`/productos?q=${encodeURIComponent(s)}`);
                             setOpen(false);
+
                             setHighlightedIndex(-1);
                           }}
                         >
@@ -318,8 +324,9 @@ export default function Header() {
                               highlightedIndex === hi ? "bg-gray-50" : ""
                             }`}
                             onClick={() => {
-                              router.push(`/productos?query=${encodeURIComponent(p.name)}`);
+                              router.push(`/productos?q=${encodeURIComponent(p.name)}`);
                               setOpen(false);
+
                               setHighlightedIndex(-1);
                             }}
                           >

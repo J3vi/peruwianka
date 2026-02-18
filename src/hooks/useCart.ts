@@ -2,28 +2,36 @@ import { useState, useEffect } from 'react';
 import { Product } from '@/lib/supabase/types';
 
 export interface CartItem {
+  cartKey: string;        // product.id + ':' + (variant_id ?? 'base')
   productId: number;
   name: string;
-  price_estimated: number;
   image_url: string;
   qty: number;
+  variant_id?: number;    // ID de la variante
+  variant_label?: string; // Label de la variante (ej: "500 g")
+  unit_price: number;     // Precio unitario real (NO price_estimated)
 }
 
 const STORAGE_KEY = "peruwianka_cart";
 
-function saveCart(nextCart: any) {
+function saveCart(nextCart: CartItem[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(nextCart));
   // esto fuerza actualización instantánea en la MISMA pestaña
   window.dispatchEvent(new Event("cart_updated"));
 }
 
-function loadCart() {
+function loadCart(): CartItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
   }
+}
+
+// Genera la clave única para el carrito
+function generateCartKey(productId: number, variantId?: number): string {
+  return `${productId}:${variantId ?? 'base'}`;
 }
 
 export function useCart() {
@@ -50,12 +58,19 @@ export function useCart() {
     };
   }, []);
 
+  // Agregar item al carrito - trata cada variante como item distinto
   const addItem = (product: Product) => {
+    const variantId = product.variant_id;
+    const cartKey = generateCartKey(product.id, variantId);
+    
+    // unit_price: usar price_estimated (que ya tiene el precio correcto sea variante o no)
+    const unitPrice = product.price_estimated;
+    
     setCart(prev => {
-      const existing = prev.find(item => item.productId === product.id);
+      const existing = prev.find(item => item.cartKey === cartKey);
       if (existing) {
         const next = prev.map(item =>
-          item.productId === product.id
+          item.cartKey === cartKey
             ? { ...item, qty: item.qty + 1 }
             : item
         );
@@ -63,11 +78,14 @@ export function useCart() {
         return next;
       } else {
         const next = [...prev, {
+          cartKey,
           productId: product.id,
           name: product.name,
-          price_estimated: product.price_estimated,
           image_url: product.image_url,
-          qty: 1
+          qty: 1,
+          variant_id: variantId,
+          variant_label: product.variant_label,
+          unit_price: unitPrice
         }];
         saveCart(next);
         return next;
@@ -75,18 +93,20 @@ export function useCart() {
     });
   };
 
-  const removeItem = (productId: number) => {
+  // Remover item por cartKey
+  const removeItem = (cartKey: string) => {
     setCart(prev => {
-      const next = prev.filter(item => item.productId !== productId);
+      const next = prev.filter(item => item.cartKey !== cartKey);
       saveCart(next);
       return next;
     });
   };
 
-  const inc = (productId: number) => {
+  // Incrementar cantidad por cartKey
+  const inc = (cartKey: string) => {
     setCart(prev => {
       const next = prev.map(item =>
-        item.productId === productId
+        item.cartKey === cartKey
           ? { ...item, qty: item.qty + 1 }
           : item
       );
@@ -95,10 +115,11 @@ export function useCart() {
     });
   };
 
-  const dec = (productId: number) => {
+  // Decrementar cantidad por cartKey
+  const dec = (cartKey: string) => {
     setCart(prev => {
       const next = prev.map(item =>
-        item.productId === productId && item.qty > 1
+        item.cartKey === cartKey && item.qty > 1
           ? { ...item, qty: item.qty - 1 }
           : item
       );
@@ -115,8 +136,9 @@ export function useCart() {
     });
   };
 
+  // Total correcto usando unit_price
   const getTotal = () => {
-    return cart.reduce((sum, item) => sum + item.price_estimated * item.qty, 0);
+    return cart.reduce((sum, item) => sum + item.unit_price * item.qty, 0);
   };
 
   const getCount = () => {
@@ -135,3 +157,4 @@ export function useCart() {
     isLoaded
   };
 }
+

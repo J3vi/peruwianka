@@ -56,7 +56,14 @@ export default function CheckoutPage() {
         city: form.city,
         address: form.address,
         comment: form.comment,
-        items: cart.map(item => ({ productId: item.productId, qty: item.qty }))
+        items: cart.map(item => ({
+          productId: item.productId,
+          qty: item.qty,
+          variant_id: item.variant_id ?? null,
+          variant_label: item.variant_label ?? null,
+          unit_price: item.unit_price,
+          line_total: item.unit_price * item.qty
+        }))
       };
 
       const res = await fetch('/api/preorder', {
@@ -108,9 +115,13 @@ export default function CheckoutPage() {
             <h2 className="text-xl font-semibold mb-4">Resumen del pedido</h2>
             <div className="space-y-2">
               {cart.map(item => (
-                <div key={item.productId} className="flex justify-between">
-                  <span>{item.name} x{item.qty}</span>
-                  <span>{formatPLN(item.price_estimated * item.qty)}</span>
+                <div key={item.cartKey} className="flex justify-between">
+                  <span>
+                    {item.name}
+                    {item.variant_label && <span className="text-gray-500"> — {item.variant_label}</span>}
+                    {' '}x{item.qty}
+                  </span>
+                  <span>{formatPLN(item.unit_price * item.qty)}</span>
                 </div>
               ))}
               {(() => {

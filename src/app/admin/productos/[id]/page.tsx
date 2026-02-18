@@ -5,6 +5,9 @@ import { createClient } from "@/lib/supabase/server";
 import { cookies, headers } from "next/headers";
 import ScrollToFlash from "./ScrollToFlash";
 import { ClearDiscountButton } from "./ClearDiscountButton";
+import VariantsEditor from "../VariantsEditor";
+import type { VariantFormData } from "../VariantsEditor";
+
 
 type PageProps = { params: { id: string }; searchParams?: { error?: string; success?: string } };
 
@@ -40,6 +43,14 @@ export default async function AdminProductoEditPage({ params, searchParams }: Pa
     .select("*")
     .eq("id", id)
     .single();
+
+  // Load existing variants
+  const { data: existingVariants } = await supabase
+    .from("product_variants")
+    .select("id,label,amount,unit,price,is_default,sort_order,is_active")
+    .eq("product_id", id)
+    .order("sort_order", { ascending: true });
+
 
   if (error || !product) {
     return (
@@ -83,8 +94,19 @@ export default async function AdminProductoEditPage({ params, searchParams }: Pa
 
     const is_active = formData.get("is_active") === "on";
 
+    // Read variants data
+    const has_variants = formData.get("has_variants") === "on";
+    const variantsJson = String(formData.get("variants_json") || "[]");
+    let variants: VariantFormData[] = [];
+    try {
+      variants = JSON.parse(variantsJson);
+    } catch {
+      variants = [];
+    }
+
     const category_id_raw = formData.get("category_id");
     const brand_id_raw = formData.get("brand_id");
+
 
     const category_id =
       category_id_raw && String(category_id_raw) !== "" ? Number(category_id_raw) : null;
@@ -147,9 +169,11 @@ export default async function AdminProductoEditPage({ params, searchParams }: Pa
       discount_percent: Number.isFinite(discount_percent) ? Math.trunc(discount_percent) : 0,
       discount_until,
       is_active,
+      has_variants,
       category_id,
       brand_id,
     };
+
 
     // SOLO si tienes una URL real (subida o editada):
     if (uploadedPublicUrl && uploadedPublicUrl.startsWith("http")) {
@@ -165,8 +189,12 @@ export default async function AdminProductoEditPage({ params, searchParams }: Pa
         "Content-Type": "application/json",
         cookie: cookieHeader,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        ...payload,
+        variants: has_variants ? variants : [],
+      }),
     });
+
 
     if (!res.ok) {
       const j = await res.json().catch(() => ({}));
@@ -180,189 +208,318 @@ export default async function AdminProductoEditPage({ params, searchParams }: Pa
   }
 
   return (
-    <div style={{ padding: 24, maxWidth: 900 }}>
+    <div className="max-w-5xl mx-auto px-4 py-8">
       {(errorMsg || successMsg) && <ScrollToFlash id="flash-msg" />}
+      
       {errorMsg && (
-        <div id="flash-msg" style={{ padding: 12, border: "1px solid #ff4d4f", borderRadius: 12, marginBottom: 14 }}>
-          <b style={{ color: "#ff4d4f" }}>Error:</b> {errorMsg}
+        <div id="flash-msg" className="mb-6 p-4 bg-red-50 border border-red-400 rounded-xl text-red-700">
+          <b>Error:</b> {errorMsg}
         </div>
       )}
+      
       {successMsg && (
-        <div id="flash-msg" style={{ padding: 12, border: "1px solid #22c55e", borderRadius: 8, marginBottom: 16 }}>
-          <b style={{ color: "#22c55e" }}>OK:</b> {successMsg}
+        <div id="flash-msg" className="mb-6 p-4 bg-green-50 border border-green-400 rounded-xl text-green-700">
+          <b>OK:</b> {successMsg}
         </div>
       )}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700 }}>Editar producto</h1>
-        <Link href="/admin/productos" style={{ textDecoration: "underline" }}>
+
+      <div className="flex items-center justify-between mb-2">
+        <h1 className="text-2xl font-bold">Editar producto</h1>
+        <Link href="/admin/productos" className="text-gray-600 hover:text-gray-800 underline">
           ← Volver a productos
         </Link>
       </div>
 
-      <p style={{ opacity: 0.7, marginTop: 6 }}>
+      <p className="text-gray-500 text-sm mb-6">
         ID: <b>{product.id}</b> · Slug: <b>{product.slug}</b>
       </p>
 
-      <form action={updateProduct} style={{ marginTop: 18, display: "grid", gap: 14 }}>
-        <label style={{ display: "grid", gap: 6 }}>
-          <span>Nombre *</span>
-          <input
-            name="name"
-            defaultValue={product.name ?? ""}
-            style={{ padding: 10, borderRadius: 10, border: "1px solid #333", background: "transparent" }}
-          />
-        </label>
+      <form action={updateProduct} className="grid grid-cols-12 gap-6">
+        {/* Left Column - 8 cols */}
+        <div className="col-span-12 lg:col-span-8 space-y-6">
+          {/* Basic Info Card */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">Información básica</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nombre *
+                </label>
+                <input
+                  name="name"
+                  defaultValue={product.name ?? ""}
+                  className="w-full h-11 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                />
+              </div>
 
-        <label style={{ display: "grid", gap: 6 }}>
-          <span>Descripción</span>
-          <textarea
-            name="description"
-            defaultValue={product.description ?? ""}
-            rows={5}
-            style={{ padding: 10, borderRadius: 10, border: "1px solid #333", background: "transparent" }}
-          />
-        </label>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
-          <label style={{ display: "grid", gap: 6 }}>
-            <span>Precio (PLN)</span>
-            <input
-              name="price_estimated"
-              type="number"
-              step="0.01"
-              defaultValue={product.price_estimated ?? 0}
-              style={{ padding: 10, borderRadius: 10, border: "1px solid #333", background: "transparent" }}
-            />
-          </label>
-
-          <label style={{ display: "grid", gap: 6 }}>
-            <span>Peso</span>
-            <input
-              name="weight"
-              type="number"
-              defaultValue={product.weight ?? 0}
-              style={{ padding: 10, borderRadius: 10, border: "1px solid #333", background: "transparent" }}
-            />
-          </label>
-
-          <label style={{ display: "grid", gap: 6 }}>
-            <span>Descuento %</span>
-            <input
-              name="discount_percent"
-              type="number"
-              defaultValue={product.discount_percent ?? 0}
-              style={{ padding: 10, borderRadius: 10, border: "1px solid #333", background: "transparent" }}
-            />
-          </label>
-        </div>
-
-        <div style={{ display: "grid", gap: 6 }}>
-          <span>Descuento hasta (fecha)</span>
-          <input
-            name="discount_until"
-            type="datetime-local"
-            defaultValue={product.discount_until ? product.discount_until.slice(0, 16) : ""}
-            style={{ padding: 10, borderRadius: 10, border: "1px solid #333", background: "transparent" }}
-          />
-          {isDiscountExpired(product.discount_percent, product.discount_until) && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
-              <span style={{ 
-                background: "#ff4d4f", 
-                color: "white", 
-                padding: "4px 8px", 
-                borderRadius: 4, 
-                fontSize: 12,
-                fontWeight: 600 
-              }}>
-                Descuento vencido
-              </span>
-              <ClearDiscountButton productId={product.id} productName={product.name} />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Descripción
+                </label>
+                <textarea
+                  name="description"
+                  defaultValue={product.description ?? ""}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                />
+              </div>
             </div>
-          )}
+          </div>
+
+          {/* Pricing & Inventory Card */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">Precio e inventario</h2>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Precio (PLN) <span id="edit-price-required">*</span>
+                </label>
+                <input
+                  name="price_estimated"
+                  id="edit_price_input"
+                  type="number"
+                  step="0.01"
+                  defaultValue={product.price_estimated ?? 0}
+                  className="w-full h-11 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Peso (g) <span id="edit-weight-required">*</span>
+                </label>
+                <input
+                  name="weight"
+                  id="edit_weight_input"
+                  type="number"
+                  defaultValue={product.weight ?? 0}
+                  className="w-full h-11 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                />
+              </div>
+
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Descuento %
+                </label>
+                <input
+                  name="discount_percent"
+                  type="number"
+                  defaultValue={product.discount_percent ?? 0}
+                  className="w-full h-11 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                />
+              </div>
+
+              <div className="col-span-3">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Descuento hasta (fecha)
+                </label>
+                <input
+                  name="discount_until"
+                  type="datetime-local"
+                  defaultValue={product.discount_until ? product.discount_until.slice(0, 16) : ""}
+                  className="w-full h-11 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                />
+                {isDiscountExpired(product.discount_percent, product.discount_until) && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold">
+                      Descuento vencido
+                    </span>
+                    <ClearDiscountButton productId={product.id} productName={product.name} />
+                  </div>
+                )}
+              </div>
+            </div>
+            <p id="edit-variants-helper-text" className="mt-3 text-sm text-gray-500 hidden">
+              ℹ️ El precio y peso final lo define la variante seleccionada
+            </p>
+          </div>
+
+
+          {/* Variants Card */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">Variantes</h2>
+            <VariantsEditor 
+              initialVariants={existingVariants || []}
+              hasVariantsInputId="edit_has_variants_input"
+              variantsJsonInputId="edit_variants_json_input"
+            />
+            <input type="hidden" name="has_variants" id="edit_has_variants_input" />
+            <input type="hidden" name="variants_json" id="edit_variants_json_input" />
+          </div>
         </div>
 
-        <label style={{ display: "grid", gap: 6 }}>
-          <span>Image URL</span>
-          <input
-            name="image_url"
-            defaultValue={product.image_url ?? ""}
-            style={{ padding: 10, borderRadius: 10, border: "1px solid #333", background: "transparent" }}
-          />
-        </label>
+        {/* Right Column - 4 cols */}
+        <div className="col-span-12 lg:col-span-4 space-y-6">
+          {/* Categories & Brand Card */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">Categorización</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Categoría
+                </label>
+                <select
+                  name="category_id"
+                  defaultValue={product.category_id ?? ""}
+                  className="w-full h-11 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent bg-white"
+                >
+                  <option value="">—</option>
+                  {(categories ?? []).map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-        <label style={{ display: "block", marginTop: 14, fontWeight: 600 }}>
-          Subir imagen (JPG/PNG)
-        </label>
-        <input
-          type="file"
-          name="file"
-          accept="image/png,image/jpeg"
-          style={{ marginTop: 8 }}
-        />
-        <p style={{ marginTop: 6, fontSize: 12, opacity: 0.7 }}>
-          Recomendado: 800×800 o 1200×1200, formato JPG o PNG.
-        </p>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Marca
+                </label>
+                <select
+                  name="brand_id"
+                  defaultValue={product.brand_id ?? ""}
+                  className="w-full h-11 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent bg-white"
+                >
+                  <option value="">—</option>
+                  {(brands ?? []).map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-          <label style={{ display: "grid", gap: 6 }}>
-            <span>Categoría</span>
-            <select
-              name="category_id"
-              defaultValue={product.category_id ?? ""}
-              style={{ padding: 10, borderRadius: 10, border: "1px solid #333", background: "transparent" }}
-            >
-              <option value="">—</option>
-              {(categories ?? []).map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          {/* Image Card */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">Imagen</h2>
+            <div className="space-y-4">
+              {/* Image Preview */}
+              {product.image_url && (
+                <div className="relative w-full h-48 rounded-lg overflow-hidden border border-gray-200">
+                  <img
+                    src={product.image_url}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
 
-          <label style={{ display: "grid", gap: 6 }}>
-            <span>Marca</span>
-            <select
-              name="brand_id"
-              defaultValue={product.brand_id ?? ""}
-              style={{ padding: 10, borderRadius: 10, border: "1px solid #333", background: "transparent" }}
-            >
-              <option value="">—</option>
-              {(brands ?? []).map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Subir imagen (JPG/PNG)
+                </label>
+                <input
+                  type="file"
+                  name="file"
+                  accept="image/png,image/jpeg"
+                  className="w-full text-sm"
+                />
+                <p className="mt-2 text-xs text-gray-500">
+                  Recomendado: 800×800 o 1200×1200, formato JPG o PNG.
+                </p>
+              </div>
 
-        <label style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 4 }}>
-          <input name="is_active" type="checkbox" defaultChecked={!!product.is_active} />
-          <span>Activo</span>
-        </label>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  O URL de imagen
+                </label>
+                <input
+                  name="image_url"
+                  defaultValue={product.image_url ?? ""}
+                  className="w-full h-11 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                />
+              </div>
+            </div>
+          </div>
 
-        <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
-          <button
-            type="submit"
-            style={{
-              padding: "10px 14px",
-              borderRadius: 12,
-              border: "1px solid #333",
-              cursor: "pointer",
-              fontWeight: 700,
-              background: "white",
-              color: "black",
-            }}
-          >
-            Guardar cambios
-          </button>
 
-          <Link href="/admin/productos" style={{ alignSelf: "center", textDecoration: "underline" }}>
-            Cancelar
-          </Link>
+          {/* Status Card */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">Estado</h2>
+            <label className="flex items-center gap-3">
+              <input 
+                name="is_active" 
+                type="checkbox" 
+                defaultChecked={!!product.is_active} 
+                className="w-5 h-5 rounded border-gray-300"
+              />
+              <span className="text-gray-700">Producto activo</span>
+            </label>
+          </div>
+
+          {/* Actions */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">Acciones</h2>
+            <div className="flex flex-col gap-3">
+              <button
+                type="submit"
+                className="w-full px-4 py-3 bg-black text-white font-semibold rounded-xl hover:bg-gray-800 transition-colors"
+              >
+                Guardar cambios
+              </button>
+              <Link
+                href="/admin/productos"
+                className="w-full px-4 py-3 text-center text-gray-600 hover:text-gray-800 font-medium border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
+              >
+                Cancelar
+              </Link>
+            </div>
+          </div>
         </div>
       </form>
+
+      {/* Client-side script for variants toggle */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              const hasVariantsInput = document.getElementById('edit_has_variants_input');
+              const priceInput = document.getElementById('edit_price_input');
+              const weightInput = document.getElementById('edit_weight_input');
+              const priceRequired = document.getElementById('edit-price-required');
+              const weightRequired = document.getElementById('edit-weight-required');
+              const variantsHelper = document.getElementById('edit-variants-helper-text');
+              
+              function updateVariantsState() {
+                const hasVariants = hasVariantsInput?.value === 'on';
+                
+                if (hasVariants) {
+                  // Disable price and weight inputs
+                  priceInput.disabled = true;
+                  weightInput.disabled = true;
+                  priceInput.placeholder = 'Se define por variantes';
+                  weightInput.placeholder = 'Se define por variantes';
+                  if (priceRequired) priceRequired.style.display = 'none';
+                  if (weightRequired) weightRequired.style.display = 'none';
+                  if (variantsHelper) variantsHelper.classList.remove('hidden');
+                } else {
+                  // Enable price and weight inputs
+                  priceInput.disabled = false;
+                  priceInput.placeholder = '';
+                  weightInput.placeholder = '';
+                  if (priceRequired) priceRequired.style.display = 'inline';
+                  if (weightRequired) weightRequired.style.display = 'inline';
+                  if (variantsHelper) variantsHelper.classList.add('hidden');
+                }
+              }
+              
+              // Watch for changes on has_variants input
+              const observer = new MutationObserver(updateVariantsState);
+              if (hasVariantsInput) {
+                observer.observe(hasVariantsInput, { attributes: true, attributeFilter: ['value'] });
+              }
+              
+              // Initial check
+              setTimeout(updateVariantsState, 100);
+            })();
+          `,
+        }}
+      />
+
     </div>
   );
 }

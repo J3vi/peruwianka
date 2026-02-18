@@ -27,33 +27,36 @@ export default function CarritoPage() {
       <h1 className="text-2xl font-bold mb-4">Carrito</h1>
       <div className="space-y-4">
         {cart.map((item) => (
-          <div key={item.productId} className="flex items-center bg-white border border-gray-200 rounded-lg p-4 shadow-md">
+          <div key={item.cartKey} className="flex items-center bg-white border border-gray-200 rounded-lg p-4 shadow-md">
             <div className="w-20 h-20 bg-gray-200 flex items-center justify-center mr-4">
               <Image src={item.image_url} alt={item.name} width={80} height={80} className="w-full h-full object-cover rounded" />
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-lg">{item.name}</h3>
-              <p className="text-green-600 font-bold">{formatPLN(item.price_estimated)}</p>
+              {item.variant_label && (
+                <p className="text-gray-500 text-sm">{item.variant_label}</p>
+              )}
+              <p className="text-green-600 font-bold">{formatPLN(item.unit_price)}</p>
             </div>
             <div className="flex items-center space-x-2">
               <button
-                onClick={() => dec(item.productId)}
+                onClick={() => dec(item.cartKey)}
                 className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
               >
                 -
               </button>
               <span className="px-3 py-1 border rounded">{item.qty}</span>
               <button
-                onClick={() => inc(item.productId)}
+                onClick={() => inc(item.cartKey)}
                 className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
               >
                 +
               </button>
             </div>
             <div className="ml-4 text-right">
-              <p className="font-bold">{formatPLN(item.price_estimated * item.qty)}</p>
+              <p className="font-bold">{formatPLN(item.unit_price * item.qty)}</p>
               <button
-                onClick={() => removeItem(item.productId)}
+                onClick={() => removeItem(item.cartKey)}
                 className="text-red-600 hover:underline text-sm"
               >
                 Eliminar
