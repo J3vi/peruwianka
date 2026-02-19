@@ -164,16 +164,22 @@ function ProductCard({ product }: { product: Product }) {
             </button>
           )
         ) : (
-          <button
-            type="button"
-            onClick={() => {
-              addItem(product);
-              toast('Se ha agregado al carrito', 'success');
-            }}
-            className="block w-full bg-[#FF3131] text-[#FC145] py-2 rounded-lg hover:bg-[#e62b2b] hover:text-[#f5b800] focus:outline-none focus:ring-2 focus:ring-[#FF3131]/40 mt-2 text-center"
-          >
-            Reserva
-          </button>
+          product.slug ? (
+            <Link
+              href={`/productos/${product.slug}`}
+              className="block w-full bg-[#FF3131] text-[#FC145] py-2 rounded-lg hover:bg-[#e62b2b] hover:text-[#f5b800] focus:outline-none focus:ring-2 focus:ring-[#FF3131]/40 mt-2 text-center"
+            >
+              Reserva
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="block w-full bg-gray-400 text-white py-2 rounded-lg cursor-not-allowed mt-2 text-center"
+            >
+              Reserva
+            </button>
+          )
         )}
 
       </div>
