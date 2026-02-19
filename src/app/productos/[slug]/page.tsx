@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Product, ProductVariant } from '@/lib/supabase/types';
@@ -30,12 +30,18 @@ function isDiscountActive(product: Product): boolean {
 
 export default function ProductDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const slug = params.slug as string;
   const { addItem } = useCart();
   
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
+  const [qty, setQty] = useState<number>(1);
+  const [reserved, setReserved] = useState(false);
+
+  const decQty = () => setQty((q) => Math.max(1, q - 1));
+  const incQty = () => setQty((q) => Math.min(99, q + 1));
 
   useEffect(() => {
     async function fetchProduct() {
@@ -75,6 +81,9 @@ export default function ProductDetailPage() {
 
     if (slug) {
       fetchProduct();
+      // Reset reserved state when changing to another product
+      setReserved(false);
+      setQty(1);
     }
   }, [slug]);
 
@@ -121,11 +130,39 @@ export default function ProductDetailPage() {
         price_estimated: selectedVariant.price,
         variant_id: selectedVariant.id,
         variant_label: selectedVariant.label,
-      });
+      }, qty);
     } else {
-      addItem(product);
+      addItem(product, qty);
     }
+    setQty(1);
     toast('Se ha agregado al carrito', 'success');
+  };
+
+  // Handler para "Reservar": 
+  // - Primer clic: agrega al carrito y cambia a "Reservado"
+  // - Segundo clic (cuando ya está reservado): redirige a checkout
+  const handleReserveClick = () => {
+    if (!product) return;
+
+    if (reserved) {
+      router.push('/checkout');
+      return;
+    }
+
+    // Agregar al carrito con la cantidad seleccionada
+    if (hasActiveVariants && selectedVariant) {
+      addItem({
+        ...product,
+        price_estimated: selectedVariant.price,
+        variant_id: selectedVariant.id,
+        variant_label: selectedVariant.label,
+      }, qty);
+    } else {
+      addItem(product, qty);
+    }
+    
+    setReserved(true);
+    toast('Se ha reservado el producto', 'success');
   };
 
   return (
@@ -191,10 +228,7 @@ export default function ProductDetailPage() {
                             : 'bg-white text-gray-700 border-gray-300 hover:border-[#FF3131] hover:text-[#FF3131]'
                         }`}
                       >
-                        {variant.label}
-                        <span className="ml-2 font-semibold">
-                          {formatPLN(variant.price)}
-                        </span>
+                        {variant.amount} {variant.unit}
                       </button>
                     ))}
                   </div>
@@ -224,8 +258,43 @@ export default function ProductDetailPage() {
 
               {/* Peso */}
               <p className="text-gray-600 mb-6">
-                Peso: <span className="font-medium">{product.weight} kg</span>
+                Peso: {' '}
+                {hasActiveVariants && selectedVariant ? (
+                  <span className="font-medium text-red-600">
+                    {selectedVariant.amount} {selectedVariant.unit}
+                  </span>
+                ) : (
+                  <span className="font-medium">{product.weight} g</span>
+                )}
               </p>
+
+              {/* Selector de cantidad */}
+              <div className="flex items-center gap-2 mb-4">
+                <button
+                  type="button"
+                  onClick={decQty}
+                  className="h-10 w-10 rounded border border-gray-300 text-lg font-bold hover:bg-gray-100 transition-colors"
+                  aria-label="Disminuir cantidad"
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  min={1}
+                  max={99}
+                  value={qty}
+                  onChange={(e) => setQty(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
+                  className="h-10 w-20 rounded border border-gray-300 text-center text-base"
+                />
+                <button
+                  type="button"
+                  onClick={incQty}
+                  className="h-10 w-10 rounded border border-gray-300 text-lg font-bold hover:bg-gray-100 transition-colors"
+                  aria-label="Aumentar cantidad"
+                >
+                  +
+                </button>
+              </div>
 
               {/* Botones Agregar al carrito / Ver carrito / Reservar */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -235,12 +304,17 @@ export default function ProductDetailPage() {
                 >
                   Ver carrito
                 </Link>
-                <Link
-                  href="/checkout"
-                  className="w-full bg-yellow-400 text-black py-3 px-4 rounded-lg text-base font-extrabold hover:bg-yellow-300 transition-colors text-center"
+                <button
+                  type="button"
+                  onClick={handleReserveClick}
+                  className={`w-full rounded-lg py-3 px-4 text-base font-extrabold transition-colors text-center ${
+                    reserved 
+                      ? 'bg-green-600 hover:bg-green-700 text-white' 
+                      : 'bg-yellow-400 hover:bg-yellow-300 text-black'
+                  }`}
                 >
-                  Reservar
-                </Link>
+                  {reserved ? 'Reservado' : 'Reservar'}
+                </button>
               </div>
             </div>
           </div>

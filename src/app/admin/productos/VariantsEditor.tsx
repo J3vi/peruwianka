@@ -15,10 +15,10 @@ export interface VariantFormData {
 
 interface VariantsEditorProps {
   initialVariants?: VariantFormData[];
+  initialHasVariants?: boolean;
   hasVariantsInputId?: string;
   variantsJsonInputId?: string;
 }
-
 
 const UNITS = [
   { value: "g", label: "g (gramos)" },
@@ -30,11 +30,12 @@ const UNITS = [
 
 export default function VariantsEditor({
   initialVariants = [],
+  initialHasVariants = false,
   hasVariantsInputId = "has_variants_input",
   variantsJsonInputId = "variants_json_input",
 }: VariantsEditorProps) {
   const [variants, setVariants] = useState<VariantFormData[]>(initialVariants);
-  const [hasVariants, setHasVariants] = useState(initialVariants.length > 0);
+  const [hasVariants, setHasVariants] = useState(initialHasVariants || initialVariants.length > 0);
   const [errors, setErrors] = useState<Record<number, string>>({});
   const hasVariantsRef = useRef<HTMLInputElement | null>(null);
   const variantsJsonRef = useRef<HTMLInputElement | null>(null);

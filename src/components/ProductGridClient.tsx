@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { Product } from '@/lib/supabase/types';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useCart } from '@/hooks/useCart';
 import Link from 'next/link';
 
 const formatPLN = (n: number) =>
@@ -33,6 +34,7 @@ function toast(message: string, type: 'success' | 'error' | 'info' = 'success') 
 // Componente individual de producto (grilla simplificada)
 function ProductCard({ product }: { product: Product }) {
   const { isFavorite, toggle } = useFavorites();
+  const { addItem } = useCart();
   const fav = isFavorite(String(product.id));
 
   // Obtener variantes activas
@@ -54,6 +56,9 @@ function ProductCard({ product }: { product: Product }) {
   const finalPrice = active 
     ? +(displayPrice * (1 - discount / 100)).toFixed(2) 
     : displayPrice;
+
+  // Producto activo para reserva
+  const isActive = product.is_active !== false;
 
 
 
@@ -129,21 +134,45 @@ function ProductCard({ product }: { product: Product }) {
           <span className="text-lg font-semibold text-green-600">{formatPLN(finalPrice)}</span>
         )}
 
-        {product.slug ? (
-          <Link
-            href={`/productos/${product.slug}`}
-            className="block w-full bg-[#FF3131] text-[#FC145] py-2 rounded-lg hover:bg-[#e62b2b] hover:text-[#f5b800] focus:outline-none focus:ring-2 focus:ring-[#FF3131]/40 mt-2 text-center"
-          >
-            Reserva
-          </Link>
-        ) : (
+        {/* Reserva:
+            - Con variantes → navegar a la página de producto para que el usuario elija variante
+            - Sin variantes → agregar al carrito (qty=1) y quedarse en la página 
+            - Si no está activo → mostrar "No disponible" */}
+        {!isActive ? (
           <button
             type="button"
             disabled
-            onClick={() => console.error('ProductGridClient: product.slug is undefined for product', product)}
             className="block w-full bg-gray-400 text-white py-2 rounded-lg cursor-not-allowed mt-2 text-center"
           >
-            Reserva (Error)
+            No disponible
+          </button>
+        ) : hasActiveVariants ? (
+          product.slug ? (
+            <Link
+              href={`/productos/${product.slug}`}
+              className="block w-full bg-[#FF3131] text-[#FC145] py-2 rounded-lg hover:bg-[#e62b2b] hover:text-[#f5b800] focus:outline-none focus:ring-2 focus:ring-[#FF3131]/40 mt-2 text-center"
+            >
+              Reserva
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="block w-full bg-gray-400 text-white py-2 rounded-lg cursor-not-allowed mt-2 text-center"
+            >
+              Reserva
+            </button>
+          )
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              addItem(product);
+              toast('Se ha agregado al carrito', 'success');
+            }}
+            className="block w-full bg-[#FF3131] text-[#FC145] py-2 rounded-lg hover:bg-[#e62b2b] hover:text-[#f5b800] focus:outline-none focus:ring-2 focus:ring-[#FF3131]/40 mt-2 text-center"
+          >
+            Reserva
           </button>
         )}
 

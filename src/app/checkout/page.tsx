@@ -20,11 +20,14 @@ export default function CheckoutPage() {
     phone: '',
     city: '',
     address: '',
+    postal_code: '',
     comment: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState<{ orderId: string } | null>(null);
+
+  const postalCodeRegex = /^(\d{2}-\d{3}|\d{5})$/;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -45,6 +48,12 @@ export default function CheckoutPage() {
       return;
     }
 
+    const postalCodeValue = form.postal_code.trim();
+    if (postalCodeValue && !postalCodeRegex.test(postalCodeValue)) {
+      setError('Código postal inválido. Use formato 12-345 o 12345.');
+      return;
+    }
+
     setLoading(true);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
@@ -55,6 +64,7 @@ export default function CheckoutPage() {
         phone: form.phone,
         city: form.city,
         address: form.address,
+        postalCode: postalCodeValue || null,
         comment: form.comment,
         items: cart.map(item => ({
           productId: item.productId,
@@ -200,6 +210,17 @@ export default function CheckoutPage() {
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded"
                   required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Código postal</label>
+                <input
+                  type="text"
+                  name="postal_code"
+                  value={form.postal_code}
+                  onChange={handleChange}
+                  placeholder="12-345"
+                  className="w-full px-3 py-2 border border-gray-300 rounded"
                 />
               </div>
               <div>

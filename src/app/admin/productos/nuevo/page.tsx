@@ -322,7 +322,7 @@ export default async function NuevoProductoPage({
 
 
           {/* Variants Card */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div id="variants_card" className="bg-white rounded-xl border border-gray-200 p-6">
             <h2 className="text-lg font-semibold mb-4 text-gray-800">Variantes</h2>
             <VariantsEditor />
             <input type="hidden" name="has_variants" id="has_variants_input" />
@@ -414,7 +414,8 @@ export default async function NuevoProductoPage({
             <div className="flex flex-col gap-3">
               <button
                 type="submit"
-                className="w-full px-4 py-3 bg-black text-white font-semibold rounded-xl hover:bg-gray-800 transition-colors"
+                id="create-button"
+                className="w-full px-4 py-3 bg-black text-white font-semibold rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Crear producto
               </button>
@@ -431,11 +432,27 @@ export default async function NuevoProductoPage({
 
 
 
-      {/* Client-side validation for discount expiration and variants toggle */}
+      {/* Client-side validation for discount expiration, variants toggle, and button state */}
       <script
         dangerouslySetInnerHTML={{
           __html: `
             (function() {
+              // === Button State Management ===
+              const createButton = document.getElementById('create-button');
+              
+              function updateButtonState(isSubmitting) {
+                if (!createButton) return;
+                
+                if (isSubmitting) {
+                  createButton.textContent = 'Creando...';
+                  createButton.disabled = true;
+                } else {
+                  createButton.textContent = 'Crear producto';
+                  createButton.disabled = false;
+                }
+              }
+              
+              // === Variants Toggle ===
               const form = document.querySelector('form');
               const discountPercentInput = document.querySelector('input[name="discount_percent"]');
               const discountUntilInput = document.querySelector('input[name="discount_until"]');
@@ -445,6 +462,7 @@ export default async function NuevoProductoPage({
               const priceRequired = document.getElementById('price-required');
               const weightRequired = document.getElementById('weight-required');
               const variantsHelper = document.getElementById('variants-helper-text');
+              const variantsCard = document.getElementById('variants_card');
               
               function checkDiscountExpiration() {
                 const discount = parseFloat(discountPercentInput?.value) || 0;
@@ -481,6 +499,8 @@ export default async function NuevoProductoPage({
                   if (priceRequired) priceRequired.style.display = 'none';
                   if (weightRequired) weightRequired.style.display = 'none';
                   if (variantsHelper) variantsHelper.classList.remove('hidden');
+                  // Show variants section
+                  if (variantsCard) variantsCard.classList.remove('hidden');
                 } else {
                   // Enable price and weight inputs
                   priceInput.disabled = false;
@@ -490,6 +510,8 @@ export default async function NuevoProductoPage({
                   if (priceRequired) priceRequired.style.display = 'inline';
                   if (weightRequired) weightRequired.style.display = 'inline';
                   if (variantsHelper) variantsHelper.classList.add('hidden');
+                  // Hide variants section
+                  if (variantsCard) variantsCard.classList.add('hidden');
                 }
               }
               
@@ -505,6 +527,13 @@ export default async function NuevoProductoPage({
               if (form && discountPercentInput && discountUntilInput) {
                 discountPercentInput.addEventListener('input', checkDiscountExpiration);
                 discountUntilInput.addEventListener('input', checkDiscountExpiration);
+              }
+
+              // Intercept form submission to show loading state
+              if (form) {
+                form.addEventListener('submit', function() {
+                  updateButtonState(true);
+                });
               }
 
             })();

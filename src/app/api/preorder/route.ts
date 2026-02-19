@@ -26,10 +26,17 @@ export async function POST(request: Request) {
     });
 
     const body = await request.json();
-    const { fullName, phone, city, address, comment, items } = body;
+    const { fullName, phone, city, address, postalCode, comment, items } = body;
 
     if (!fullName || !phone || !city || !address || !items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    // Validar código postal si se proporciona
+    const postalCodeRegex = /^(\d{2}-\d{3}|\d{5})$/;
+    const postalCodeValue = postalCode?.trim() || null;
+    if (postalCodeValue && !postalCodeRegex.test(postalCodeValue)) {
+      return NextResponse.json({ error: "Código postal inválido. Use formato 12-345 o 12345" }, { status: 400 });
     }
 
     // ✅ Get user if authenticated (token optional)
@@ -74,6 +81,7 @@ export async function POST(request: Request) {
         phone,
         city,
         address,
+        postal_code: postalCodeValue,
         comment: comment || null,
         items: orderItems,
         total_estimated: totalEstimated,

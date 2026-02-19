@@ -341,6 +341,7 @@ export default async function AdminProductoEditPage({ params, searchParams }: Pa
             <h2 className="text-lg font-semibold mb-4 text-gray-800">Variantes</h2>
             <VariantsEditor 
               initialVariants={existingVariants || []}
+              initialHasVariants={!!product.has_variants}
               hasVariantsInputId="edit_has_variants_input"
               variantsJsonInputId="edit_variants_json_input"
             />
@@ -440,15 +441,27 @@ export default async function AdminProductoEditPage({ params, searchParams }: Pa
           {/* Status Card */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h2 className="text-lg font-semibold mb-4 text-gray-800">Estado</h2>
-            <label className="flex items-center gap-3">
-              <input 
-                name="is_active" 
-                type="checkbox" 
-                defaultChecked={!!product.is_active} 
-                className="w-5 h-5 rounded border-gray-300"
-              />
-              <span className="text-gray-700">Producto activo</span>
-            </label>
+            <div className="space-y-4">
+              <label className="flex items-center gap-3">
+                <input 
+                  name="is_active" 
+                  type="checkbox" 
+                  defaultChecked={!!product.is_active} 
+                  className="w-5 h-5 rounded border-gray-300"
+                />
+                <span className="text-gray-700">Producto activo</span>
+              </label>
+              <label className="flex items-center gap-3">
+                <input 
+                  name="has_variants" 
+                  type="checkbox" 
+                  id="edit_has_variants_checkbox"
+                  defaultChecked={!!product.has_variants} 
+                  className="w-5 h-5 rounded border-gray-300"
+                />
+                <span className="text-gray-700">Este producto tiene variantes</span>
+              </label>
+            </div>
           </div>
 
           {/* Actions */}
@@ -457,7 +470,8 @@ export default async function AdminProductoEditPage({ params, searchParams }: Pa
             <div className="flex flex-col gap-3">
               <button
                 type="submit"
-                className="w-full px-4 py-3 bg-black text-white font-semibold rounded-xl hover:bg-gray-800 transition-colors"
+                id="save-button"
+                className="w-full px-4 py-3 bg-black text-white font-semibold rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Guardar cambios
               </button>
@@ -472,20 +486,59 @@ export default async function AdminProductoEditPage({ params, searchParams }: Pa
         </div>
       </form>
 
-      {/* Client-side script for variants toggle */}
+      {/* Client-side script for variants toggle and button states */}
       <script
         dangerouslySetInnerHTML={{
           __html: `
             (function() {
+              // === Button State Management ===
+              let isDirty = false;
+              let saveState = 'idle'; // 'idle' | 'saving' | 'saved'
+              
+              const saveButton = document.getElementById('save-button');
+              
+              function updateButtonState() {
+                if (!saveButton) return;
+                
+                if (saveState === 'saving') {
+                  saveButton.textContent = 'Guardando...';
+                  saveButton.disabled = true;
+                } else if (saveState === 'saved' && !isDirty) {
+                  saveButton.textContent = 'Guardado';
+                  saveButton.disabled = true;
+                } else {
+                  saveButton.textContent = 'Guardar cambios';
+                  saveButton.disabled = !isDirty;
+                }
+              }
+              
+              function setDirty() {
+                if (!isDirty) {
+                  isDirty = true;
+                  if (saveState === 'saved') {
+                    saveState = 'idle';
+                  }
+                  updateButtonState();
+                }
+              }
+              
+              // === Variants Toggle ===
+              const hasVariantsCheckbox = document.getElementById('edit_has_variants_checkbox');
               const hasVariantsInput = document.getElementById('edit_has_variants_input');
               const priceInput = document.getElementById('edit_price_input');
               const weightInput = document.getElementById('edit_weight_input');
               const priceRequired = document.getElementById('edit-price-required');
               const weightRequired = document.getElementById('edit-weight-required');
               const variantsHelper = document.getElementById('edit-variants-helper-text');
+              const variantsCard = document.querySelector('.bg-white.rounded-xl.border.border-gray-200.p-6:nth-child(3)');
               
               function updateVariantsState() {
-                const hasVariants = hasVariantsInput?.value === 'on';
+                const hasVariants = hasVariantsCheckbox?.checked || hasVariantsInput?.value === 'on';
+                
+                // Sync hidden input with checkbox
+                if (hasVariantsInput) {
+                  hasVariantsInput.value = hasVariants ? 'on' : '';
+                }
                 
                 if (hasVariants) {
                   // Disable price and weight inputs
@@ -496,6 +549,8 @@ export default async function AdminProductoEditPage({ params, searchParams }: Pa
                   if (priceRequired) priceRequired.style.display = 'none';
                   if (weightRequired) weightRequired.style.display = 'none';
                   if (variantsHelper) variantsHelper.classList.remove('hidden');
+                  // Show variants section
+                  if (variantsCard) variantsCard.classList.remove('hidden');
                 } else {
                   // Enable price and weight inputs
                   priceInput.disabled = false;
@@ -504,17 +559,60 @@ export default async function AdminProductoEditPage({ params, searchParams }: Pa
                   if (priceRequired) priceRequired.style.display = 'inline';
                   if (weightRequired) weightRequired.style.display = 'inline';
                   if (variantsHelper) variantsHelper.classList.add('hidden');
+                  // Hide variants section
+                  if (variantsCard) variantsCard.classList.add('hidden');
                 }
               }
               
-              // Watch for changes on has_variants input
+              // Listen to checkbox changes directly
+              if (hasVariantsCheckbox) {
+                hasVariantsCheckbox.addEventListener('change', updateVariantsState);
+              }
+              
+              // Watch for changes on has_variants input (from VariantsEditor)
               const observer = new MutationObserver(updateVariantsState);
               if (hasVariantsInput) {
                 observer.observe(hasVariantsInput, { attributes: true, attributeFilter: ['value'] });
               }
               
-              // Initial check
+              // Initial check - set hidden input based on checkbox state
+              if (hasVariantsCheckbox && hasVariantsInput) {
+                hasVariantsInput.value = hasVariantsCheckbox.checked ? 'on' : '';
+              }
+              
+              // Initial check after DOM is ready
               setTimeout(updateVariantsState, 100);
+              
+              // === Dirty Tracking ===
+              // Listen to all input changes in the form
+              const form = document.querySelector('form');
+              if (form) {
+                const inputs = form.querySelectorAll('input, select, textarea');
+                inputs.forEach(function(input) {
+                  // Skip the file input
+                  if (input.type === 'file') return;
+                  input.addEventListener('input', setDirty);
+                  input.addEventListener('change', setDirty);
+                });
+              }
+              
+              // Listen for variants changes
+              const variantsJsonInput = document.getElementById('edit_variants_json_input');
+              if (variantsJsonInput) {
+                const variantsObserver = new MutationObserver(setDirty);
+                variantsObserver.observe(variantsJsonInput, { attributes: true, attributeFilter: ['value'] });
+              }
+              
+              // Initial button state
+              updateButtonState();
+              
+              // Intercept form submission to show saving state
+              if (form) {
+                form.addEventListener('submit', function() {
+                  saveState = 'saving';
+                  updateButtonState();
+                });
+              }
             })();
           `,
         }}

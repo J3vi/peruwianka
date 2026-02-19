@@ -92,6 +92,9 @@ export default function OffersCarouselClient({ products }: { products: Product[]
           const discount = Number(product.discount_percent ?? 0);
           const finalPrice = active ? +(price * (1 - discount / 100)).toFixed(2) : price;
 
+          // Producto activo para reserva
+          const isActive = product.is_active !== false;
+
           // Link "inteligente" por si existe tu ruta por categoría
           const href =
             product.category_slug ? `/productos?cat=${encodeURIComponent(product.category_slug)}` : "/productos";
@@ -160,16 +163,26 @@ export default function OffersCarouselClient({ products }: { products: Product[]
                 )}
 
                 <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      addItem(product);
-                      toast("Se ha agregado al carrito", "success");
-                    }}
-                    className="flex-1 bg-[#FF3131] text-[#FC145] py-2 rounded-xl hover:bg-[#e62b2b] hover:text-[#f5b800] focus:outline-none focus:ring-2 focus:ring-[#FF3131]/40 font-semibold"
-                  >
-                    Reserva
-                  </button>
+                  {isActive ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        addItem(product);
+                        toast("Se ha agregado al carrito", "success");
+                      }}
+                      className="flex-1 bg-[#FF3131] text-[#FC145] py-2 rounded-xl hover:bg-[#e62b2b] hover:text-[#f5b800] focus:outline-none focus:ring-2 focus:ring-[#FF3131]/40 font-semibold"
+                    >
+                      Reserva
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled
+                      className="flex-1 bg-gray-400 text-white py-2 rounded-xl cursor-not-allowed font-semibold"
+                    >
+                      No disponible
+                    </button>
+                  )}
 
                   <Link
                     href={href}

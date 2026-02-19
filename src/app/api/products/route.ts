@@ -102,7 +102,19 @@ export async function GET(request: Request) {
         const final_price =
           discount > 0 ? +(price * (1 - discount / 100)).toFixed(2) : price;
 
-        return { ...p, final_price };
+        // Filter variants: only return active ones, and only when has_variants=true
+        let filteredVariants: any[] = [];
+        if (p.has_variants && p.product_variants) {
+          filteredVariants = p.product_variants
+            .filter((v: any) => v.is_active === true)
+            .sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+        }
+
+        return { 
+          ...p, 
+          final_price,
+          product_variants: filteredVariants
+        };
       });
 
     const totalPages = Math.ceil((count ?? 0) / limit);

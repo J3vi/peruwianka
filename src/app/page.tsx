@@ -12,10 +12,11 @@ export default async function Page() {
   const nowIso = new Date().toISOString();
 
   // 1) Ofertas: productos con discount_percent > 0 Y descuento activo
-  // Regla: discount_percent > 0 AND (discount_until IS NULL OR discount_until > NOW())
+  // Regla: discount_percent > 0 AND (discount_until IS NULL OR discount_until > NOW()) AND is_active = true
   const { data: offersNull, error: offersErrorNull } = await supabase
     .from("products")
     .select("*")
+    .eq("is_active", true)
     .gt("discount_percent", 0)
     .is("discount_until", null)
     .order("created_at", { ascending: false });
@@ -23,6 +24,7 @@ export default async function Page() {
   const { data: offersFuture, error: offersErrorFuture } = await supabase
     .from("products")
     .select("*")
+    .eq("is_active", true)
     .gt("discount_percent", 0)
     .gt("discount_until", nowIso)
     .order("created_at", { ascending: false });
@@ -39,10 +41,11 @@ export default async function Page() {
   const offers = Array.from(offersMap.values()).slice(0, 12);
   const offersError = offersErrorNull || offersErrorFuture;
 
-  // 2) Novedades: últimos productos
+  // 2) Novedades: últimos productos (solo activos)
   const { data: newest, error: newestError } = await supabase
     .from("products")
     .select("*")
+    .eq("is_active", true)
     .order("created_at", { ascending: false })
     .limit(12);
 

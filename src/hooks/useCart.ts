@@ -59,7 +59,8 @@ export function useCart() {
   }, []);
 
   // Agregar item al carrito - trata cada variante como item distinto
-  const addItem = (product: Product) => {
+  const addItem = (product: Product, qty: number = 1) => {
+    const q = Math.max(1, Math.floor(Number(qty) || 1));
     const variantId = product.variant_id;
     const cartKey = generateCartKey(product.id, variantId);
     
@@ -71,7 +72,7 @@ export function useCart() {
       if (existing) {
         const next = prev.map(item =>
           item.cartKey === cartKey
-            ? { ...item, qty: item.qty + 1 }
+            ? { ...item, qty: item.qty + q }
             : item
         );
         saveCart(next);
@@ -82,7 +83,7 @@ export function useCart() {
           productId: product.id,
           name: product.name,
           image_url: product.image_url,
-          qty: 1,
+          qty: q,
           variant_id: variantId,
           variant_label: product.variant_label,
           unit_price: unitPrice

@@ -20,6 +20,7 @@ type Order = {
   phone: string;
   city: string;
   address: string;
+  postal_code: string | null;
   comment: string | null;
   items: OrderItem[] | null;
   total_estimated: number;
@@ -79,6 +80,16 @@ export default function OrdenesPage() {
   const [newComment, setNewComment] = useState('');
   const [savingStatus, setSavingStatus] = useState(false);
 
+  // Pending summary (Pendientes estado: nuevo)
+
+  const [pendingDays, setPendingDays] = useState(30);
+  const [pendingLoading, setPendingLoading] = useState(false);
+  const [pendingError, setPendingError] = useState<string | null>(null);
+  const [pendingTotalUnits, setPendingTotalUnits] = useState(0);
+  const [pendingProducts, setPendingProducts] = useState<{ name: string; qty: number }[]>([]);
+
+
+
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -110,6 +121,56 @@ export default function OrdenesPage() {
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders, sort]);
+
+  // Fetch pending summary data (Pendientes estado: nuevo)
+
+  const fetchPendingSummary = useCallback(async () => {
+    setPendingLoading(true);
+    setPendingError(null);
+    try {
+      const res = await fetch(`/api/admin/orders/pending-summary?days=${pendingDays}`);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Error al cargar pendientes');
+      }
+      if (data.ok && data.data) {
+        setPendingTotalUnits(data.data.totalUnits || 0);
+        setPendingProducts(data.data.products || []);
+      }
+    } catch (err: any) {
+      setPendingError(err.message || 'Error inesperado');
+    } finally {
+      setPendingLoading(false);
+    }
+  }, [pendingDays]);
+
+  useEffect(() => {
+    fetchPendingSummary();
+  }, [fetchPendingSummary]);
+
+  // Export pending summary to CSV
+  const handleExportPendingCSV = () => {
+    if (pendingProducts.length === 0) return;
+    
+    const total = pendingTotalUnits || 0;
+    const rows = pendingProducts.map((p) => {
+      const percentage = total > 0 ? Math.round((p.qty / total) * 100) : 0;
+      return `${p.name},${p.qty},${percentage}%`;
+    });
+    
+    const csvContent = '\ufeffProducto,Unidades,Porcentaje\n' + rows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `pendientes-nuevo-${pendingDays}d.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+
 
   const updateUrlParams = useCallback(() => {
     const params = new URLSearchParams();
@@ -359,7 +420,116 @@ export default function OrdenesPage() {
         </Link>
       </div>
 
+      {/* Error */}
+      {error && (
+        <div className="mb-4 rounded-lg bg-red-50 p-4 text-red-600">
+          {error}
+        </div>
+      )}
+
+      {/* Pendientes (estado: nuevo) */}
+
+      <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+        <h2 className="mb-4 text-lg font-bold">Pendientes (estado: nuevo)</h2>
+        
+        {/* Tabs */}
+        <div className="mb-4 flex gap-2">
+          {[7, 30, 90].map((d) => (
+            <button
+              key={d}
+              onClick={() => setPendingDays(d)}
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                pendingDays === d
+                  ? 'bg-gray-900 text-white'
+                  : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              {d}d
+            </button>
+          ))}
+        </div>
+
+        {/* Total */}
+        <div className="mb-4 text-sm text-gray-600">
+          Total unidades ({pendingDays}d): <span className="font-semibold">{pendingTotalUnits}</span>
+        </div>
+
+        {/* Error */}
+        {pendingError && (
+          <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
+            {pendingError}
+          </div>
+        )}
+
+        {/* Loading */}
+        {pendingLoading && (
+          <div className="py-4 text-center text-sm text-gray-500">Cargando...</div>
+        )}
+
+        {/* Table */}
+        {!pendingLoading && !pendingError && pendingProducts.length > 0 && (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Producto</th>
+                  <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Unidades</th>
+                  <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">% del total</th>
+                  <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Barra</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {pendingProducts.map((product) => {
+                  const percentage = pendingTotalUnits > 0 
+                    ? Math.round((product.qty / pendingTotalUnits) * 100) 
+                    : 0;
+                  const top1Qty = pendingProducts[0]?.qty || 0;
+                  const barWidth = top1Qty > 0 ? (product.qty / top1Qty) * 100 : 0;
+                  
+                  return (
+                    <tr key={product.name} className="hover:bg-gray-50">
+                      <td className="px-4 py-2 text-sm text-gray-900">{product.name}</td>
+                      <td className="px-4 py-2 text-sm text-gray-900">{product.qty}</td>
+                      <td className="px-4 py-2 text-sm text-gray-900">
+                        {pendingTotalUnits > 0 ? `${percentage}%` : '0%'}
+                      </td>
+                      <td className="px-4 py-2 text-sm text-gray-900">
+                        <div className="h-2 w-32 rounded-full bg-gray-200">
+                          <div
+                            className="h-2 rounded-full bg-blue-600"
+                            style={{ width: `${barWidth}%` }}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {!pendingLoading && !pendingError && pendingProducts.length === 0 && (
+          <div className="py-4 text-center text-sm text-gray-500">
+            No hay productos pendientes
+          </div>
+        )}
+
+        {/* Export CSV */}
+        {!pendingLoading && !pendingError && pendingProducts.length > 0 && (
+          <div className="mt-4">
+            <button
+              onClick={handleExportPendingCSV}
+              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Exportar CSV
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Barra superior: filtros */}
+
       <div className="mb-6 flex flex-wrap items-center gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
         <form onSubmit={handleSearch} className="flex items-center gap-2">
           <input
@@ -432,14 +602,8 @@ export default function OrdenesPage() {
 
       </div>
 
-      {/* Error */}
-      {error && (
-        <div className="mb-4 rounded-lg bg-red-50 p-4 text-red-600">
-          {error}
-        </div>
-      )}
-
       {/* Tabla */}
+
       <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
         <table className="w-full">
           <thead className="bg-gray-50">
@@ -591,6 +755,9 @@ export default function OrdenesPage() {
                     <div><span className="font-medium">Teléfono:</span> {selectedOrder.phone}</div>
                     <div><span className="font-medium">Ciudad:</span> {selectedOrder.city}</div>
                     <div><span className="font-medium">Dirección:</span> {selectedOrder.address}</div>
+                    {selectedOrder.postal_code && (
+                      <div><span className="font-medium">Código postal:</span> {selectedOrder.postal_code}</div>
+                    )}
                     {selectedOrder.email && (
                       <div><span className="font-medium">Email:</span> {selectedOrder.email}</div>
                     )}
