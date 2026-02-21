@@ -1,3 +1,4 @@
+
 // src/app/politica-de-privacidad/page.tsx
 
 export default function PoliticaDePrivacidad() {
@@ -9,7 +10,7 @@ export default function PoliticaDePrivacidad() {
     <div className="max-w-4xl mx-auto px-4 py-10">
       <header className="mb-10">
         <h1 className="text-4xl font-bold mb-2">Política de Privacidad</h1>
-        <p className="text-gray-500">Fecha de última actualización: [dd/mm/aaaa]</p>
+        <p className="text-gray-500">Fecha de última actualización: 21/02/2026</p>
       </header>
 
       <article className="space-y-10">
@@ -29,23 +30,19 @@ export default function PoliticaDePrivacidad() {
           <p className="mb-3">El responsable del tratamiento de tus datos personales es:</p>
           <ul className="list-disc pl-6 space-y-2">
             <li>
-              <strong>[RAZÓN SOCIAL / NOMBRE LEGAL DE LA EMPRESA]</strong>
+              <strong>PERUWIANKA FOOD &amp; DRINKS DISTRIBUTION</strong>
             </li>
-            <li>Domicilio: [DIRECCIÓN COMPLETA EN POLONIA / UE]</li>
-            <li>NIP (si aplica): [NIP]</li>
-            <li>Correo de contacto (privacidad): [EMAIL PRIVACIDAD]</li>
-            <li>Teléfono (opcional): [TELÉFONO]</li>
+            <li>Domicilio: Ul. Ignacego Łukasiewicza 5A</li>
+            <li>NIP (si aplica): En trámite</li>
+            <li>Correo de contacto (privacidad): peruwiankapl@gmail.com</li>
           </ul>
-          <p className="mt-4 text-sm text-gray-600 leading-relaxed">
-            Si aún no tienes razón social o NIP definidos, no uses datos inventados. Indica el titular real y actualiza cuando formalices la empresa.
-          </p>
         </section>
 
         {/* 2 */}
         <section>
           <h2 className="text-2xl font-semibold mb-4">2) ¿Cómo puedes contactarnos sobre privacidad?</h2>
           <p className="leading-relaxed">
-            Para cualquier asunto sobre datos personales, puedes escribir a: <strong>[EMAIL PRIVACIDAD]</strong>.
+            Para cualquier asunto sobre datos personales, puedes escribir a: <strong>peruwiankapl@gmail.com</strong>.
           </p>
           <p className="leading-relaxed mt-2">
             Asunto sugerido: <Code>Privacidad – Solicitud GDPR</Code>
@@ -55,12 +52,7 @@ export default function PoliticaDePrivacidad() {
             <p className="mb-2">
               <strong>Delegado de Protección de Datos (DPO):</strong>
             </p>
-            <ul className="list-disc pl-6 space-y-1">
-              <li>[ ] No hemos designado DPO.</li>
-              <li>
-                [ ] Hemos designado DPO y puedes contactarlo en: <strong>[EMAIL DPO]</strong>
-              </li>
-            </ul>
+            <p>No hemos designado DPO.</p>
           </div>
         </section>
 
@@ -260,3 +252,5 @@ export default function PoliticaDePrivacidad() {
     </div>
   )
 }
+
+

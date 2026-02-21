@@ -1,11 +1,12 @@
 // src/app/terminos/page.tsx
+import Link from "next/link"
 
 export default function Terminos() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
       <header className="mb-10">
         <h1 className="text-4xl font-bold mb-2">Términos y Condiciones – Peruwianka</h1>
-        <p className="text-gray-500">Fecha de última actualización: [dd/mm/aaaa]</p>
+        <p className="text-gray-500">Fecha de última actualización: 21/02/2026</p>
       </header>
 
       <article className="space-y-10">
@@ -25,16 +26,12 @@ export default function Terminos() {
           <p className="mb-3">El vendedor y responsable del Sitio es:</p>
           <ul className="list-disc pl-6 space-y-2">
             <li>
-              <strong>[RAZÓN SOCIAL / NOMBRE LEGAL]</strong>
+              <strong>PERUWIANKA FOOD &amp; DRINKS DISTRIBUTION</strong>
             </li>
-            <li>Dirección: [DIRECCIÓN]</li>
-            <li>NIP (si aplica): [NIP]</li>
-            <li>Email: [EMAIL]</li>
-            <li>Teléfono (opcional): [TELÉFONO]</li>
+            <li>Dirección: Ul. Ignacego Łukasiewicza 5A</li>
+            <li>NIP (si aplica): En trámite</li>
+            <li>Email: peruwiankapl@gmail.com</li>
           </ul>
-          <p className="mt-4 text-sm text-gray-600">
-            Si estos datos están pendientes de formalización, se indicará como <strong>[PENDIENTE]</strong> y se actualizarán cuando corresponda.
-          </p>
         </section>
 
         {/* 3 */}
@@ -101,7 +98,7 @@ export default function Terminos() {
             <li>Describimos los productos con el mayor cuidado posible. Las imágenes son referenciales.</li>
             <li>La disponibilidad puede cambiar sin previo aviso.</li>
             <li>
-              Los precios se muestran en <strong>[PLN]</strong> e incluyen impuestos aplicables, salvo indicación expresa.
+            Los precios se muestran en <strong>PLN</strong> e incluyen impuestos aplicables, salvo indicación expresa.
             </li>
             <li>Los costos de envío se informan antes de finalizar la compra.</li>
           </ul>
@@ -144,7 +141,7 @@ export default function Terminos() {
           <h2 className="text-2xl font-semibold mb-4">9) Entrega y envíos</h2>
           <ul className="list-disc pl-6 space-y-2 mb-4">
             <li>
-              <strong>Zonas de entrega:</strong> [PENDIENTE: Polonia / UE / especificar].
+              <strong>Zonas de entrega:</strong> Polonia.
             </li>
             <li>
               <strong>Plazos estimados:</strong> se informan durante la compra y pueden variar por disponibilidad y transportista.
@@ -166,7 +163,7 @@ export default function Terminos() {
             sin necesidad de justificación, salvo excepciones legales.
           </p>
           <p className="mb-4 leading-relaxed">
-            Para ejercerlo, debes comunicarlo por escrito a <strong>[EMAIL]</strong> indicando: número de pedido, nombre y datos de contacto.
+          Para ejercerlo, debes comunicarlo por escrito a <strong>peruwiankapl@gmail.com</strong> indicando: número de pedido, nombre y datos de contacto.
           </p>
 
           <h3 className="text-xl font-medium mb-2">Efectos del desistimiento</h3>
@@ -198,11 +195,11 @@ export default function Terminos() {
               <strong>Condición:</strong> los productos deben devolverse en buen estado y, si aplica, sin abrir o dañar el precinto original.
             </li>
             <li>
-              <strong>Coste de devolución:</strong> [PENDIENTE: a cargo del cliente / a cargo del vendedor en caso de error].
+              <strong>Coste de devolución:</strong> a cargo del cliente (previa revisión del pedido). A cargo del vendedor en caso de error.
             </li>
             <li>
-              Si recibes un producto equivocado o dañado, contáctanos dentro de <strong>[48/72]</strong> horas con fotos del paquete y del producto a{" "}
-              <strong>[EMAIL]</strong>.
+              Si recibes un producto equivocado o dañado, contáctanos dentro de <strong>48</strong> horas con fotos del paquete y del producto a{" "}
+              <strong>peruwiankapl@gmail.com</strong>.
             </li>
           </ul>
 
@@ -215,7 +212,7 @@ export default function Terminos() {
           <h2 className="text-2xl font-semibold mb-4">12) Reclamaciones y atención al cliente</h2>
           <p className="mb-2">Puedes presentar reclamaciones o solicitar soporte por:</p>
           <p className="mb-2">
-            Email: <strong>[EMAIL]</strong>
+          Email: <strong>peruwiankapl@gmail.com</strong>
           </p>
           <p className="mb-4">
             Asunto sugerido:{" "}
@@ -273,8 +270,8 @@ export default function Terminos() {
         <section>
           <h2 className="text-2xl font-semibold mb-4">17) Protección de datos</h2>
           <p className="leading-relaxed">
-            El tratamiento de datos personales se rige por nuestra Política de Privacidad disponible en{" "}
-            <code className="px-1 py-0.5 rounded bg-gray-100">/politica-de-privacidad</code>.
+            El tratamiento de datos personales se rige por nuestra{" "}
+            <Link href="/politica-de-privacidad" className="text-green-600 hover:underline">Política de Privacidad</Link>.
           </p>
         </section>
 
@@ -291,7 +288,7 @@ export default function Terminos() {
         <section>
           <h2 className="text-2xl font-semibold mb-4">19) Ley aplicable y jurisdicción</h2>
           <p className="leading-relaxed">
-            Estos Términos se rigen por la ley de <strong>[Polonia]</strong> y las normas de protección al consumidor aplicables. En caso de disputa, se
+            Estos Términos se rigen por la ley de <strong>Polonia</strong> y las normas de protección al consumidor aplicables. En caso de disputa, se
             buscará una solución amistosa; si no fuera posible, el asunto se someterá a los tribunales competentes, sin perjuicio de los derechos del
             consumidor.
           </p>
