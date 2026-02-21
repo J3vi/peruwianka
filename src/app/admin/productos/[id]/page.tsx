@@ -471,6 +471,7 @@ export default async function AdminProductoEditPage({ params, searchParams }: Pa
               <button
                 type="submit"
                 id="save-button"
+                data-initial-saved={successMsg ? "true" : "false"}
                 className="w-full px-4 py-3 bg-black text-white font-semibold rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Guardar cambios
@@ -492,10 +493,10 @@ export default async function AdminProductoEditPage({ params, searchParams }: Pa
           __html: `
             (function() {
               // === Button State Management ===
-              let isDirty = false;
-              let saveState = 'idle'; // 'idle' | 'saving' | 'saved'
-              
               const saveButton = document.getElementById('save-button');
+              const initialSaved = saveButton?.dataset?.initialSaved === 'true';
+              let isDirty = false;
+              let saveState = initialSaved ? 'saved' : 'idle'; // 'idle' | 'saving' | 'saved'
               
               function updateButtonState() {
                 if (!saveButton) return;
