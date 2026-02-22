@@ -3,16 +3,21 @@ import Categories from "@/components/Categories";
 import ProductGridClient from "@/components/ProductGridClient";
 import { createClient } from "@/lib/supabase/server";
 import type { Product } from "@/lib/supabase/types";
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
+type Banner = {
+  image_url: string;
+  link_url: string | null;
+  created_at: string;
+  updated_at: string | null;
+};
+
+export const revalidate = 86400;
 
 export default async function Page() {
-  const supabase = await createClient();
+  const supabase = createClient();
   const nowIso = new Date().toISOString();
 
-  // 1) Ofertas: productos con discount_percent > 0 Y descuento activo
-  // Regla: discount_percent > 0 AND (discount_until IS NULL OR discount_until > NOW()) AND is_active = true
+  // 1) Ofertas: productos con discount_percent > 0 y descuento activo
   const { data: offersNull, error: offersErrorNull } = await supabase
     .from("products")
     .select("*")
@@ -77,15 +82,21 @@ export default async function Page() {
   // Manejo de errores unificado
   const error = offersError || newestError;
 
+  // 4) Banners (server)
+  const { data: bannersData } = await supabase
+    .from("banners")
+    .select("image_url, link_url, created_at, updated_at")
+    .eq("is_active", true)
+    .order("order_index", { ascending: true });
+
+  const banners: Banner[] = (bannersData as Banner[]) ?? [];
+
   return (
     <main>
-    
-
       <div className="px-4 bg-[#FFF7E6]">
-        <BannerCarousel />
-      </div>
-
-      {/* Categorías (usa tu componente real, NO hardcode) */}
+  <BannerCarousel banners={banners} />
+</div>
+      {/* Categorías */}
       <section className="py-2">
         <h2 className="text-3xl font-bold text-center">Categorías</h2>
         <div className="mt-1">
@@ -93,7 +104,7 @@ export default async function Page() {
         </div>
       </section>
 
-      {/* Ofertas y Novedades (PRODUCTOS REALES) */}
+      {/* Ofertas y Novedades */}
       <section className="py-0">
         <h2 className="text-3xl font-bold text-center">Ofertas y Novedades</h2>
 
@@ -107,6 +118,6 @@ export default async function Page() {
           </div>
         )}
       </section>
-    </main>
-  );
+      </main>
+);
 }

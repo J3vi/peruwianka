@@ -9,7 +9,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 export const dynamic = "force-dynamic";
-
+import CookieConsent from "@/components/CookieConsent";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -39,6 +39,7 @@ export default function RootLayout({
         <AuthRefresh />
         <WhatsAppFloating />
         <GoogleAnalytics gaId="G-44D50ZB26Y" />
+        <CookieConsent />
       </body>
     </html>
   );
